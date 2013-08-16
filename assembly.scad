@@ -1,4 +1,5 @@
 da6 = 1 / cos(180 / 6) / 2;
+da8 = 1 / cos(180 / 8) / 2;
 
 // Copyright 2011 Cliff L. Biffle.
 // This file is licensed Creative Commons Attribution-ShareAlike 3.0.
@@ -22,18 +23,23 @@ ext_shaft_length  = 60;
 ext_shaft_diam    = 6; // m6 bolt
 ext_shaft_diam    = 5; // m5 threaded rod
 ext_shaft_opening = bearing_outer - 3;
+ext_shaft_opening = ext_shaft_diam + 3;
 
 carriage_hole_spacing = 30;
+
+motor_screw_spacing = 26;
 
 hotend_length = 63;
 hotend_diam   = 16;
 hotend_mount_hole_depth = 5;
 hotend_mount_screw_hole_spacing = 24;
-hotend_mount_depth = 0.75;
-
+hotend_mount_screw_diam = 4;
+hotend_mount_length = 37.5*2;
+hotend_mount_width = 28;
+hotend_mount_height = 0.75;
 
 mount_plate_thickness = 3;
-bottom_thickness = 5;
+bottom_thickness = 7;
 body_bottom_pos = -motor_side/2-bottom_thickness;
 total_depth = mount_plate_thickness + motor_height;
 total_width = motor_side + motor_side*1.4;
@@ -112,7 +118,7 @@ module extruder_body_holes() {
   translate([bearing_outer/2,motor_height/2,0]) cube([bearing_outer,motor_height*2,ext_shaft_opening],center=true);
 
   // large opening
-  translate([motor_side/2+ext_shaft_opening/2,motor_height/2,motor_side/2-ext_shaft_opening/2])
+  translate([motor_side/2+bearing_outer/2-1,motor_height/2,motor_side/2-ext_shaft_opening/2])
     cube([motor_side,motor_height*2,motor_side],center=true);
 
   // filament path
@@ -134,20 +140,43 @@ module extruder_body_holes() {
 
   // idler holder brace
   % translate([bearing_outer/2+2+ext_shaft_diam/2,filament_y,0])
-    cube([bearing_inner+2,bearing_height+10,bearing_outer+10],center=true);
+    cube([bearing_inner+2,bearing_height+12,bearing_outer+10],center=true);
 
-  // motor shoulder
-  translate([-gear_dist,0,0]) rotate([90,0,0]) cylinder(r=motor_shoulder_diam/2+1,h=mount_plate_thickness*2.1,center=true);
+  // motor
+  translate([-gear_dist,mount_plate_thickness/2,0]) rotate([90,0,0]){
+    // motor shoulder
+    cylinder(r=motor_shoulder_diam/2+1,h=mount_plate_thickness*2,center=true);
+    
+    // motor mounting holes
+    for (x=[-1,1]) {
+      for (y=[-1,1]) {
+        translate([motor_screw_spacing/2*x,motor_screw_spacing/2*y,0]) cylinder(r=3.1/2,h=mount_plate_thickness*2,$fn=36,center=true);
+      }
+    }
+  }
 
+
+  // hotend
   translate([filament_x,filament_y,body_bottom_pos]) {
     // hotend mount hole
-    translate([0,0,hotend_mount_depth]) cylinder(r=hotend_diam/2,h=hotend_mount_hole_depth*2,center=true);
-    // hotend plate recess
-    translate([0,0,0]) cube([hotend_mount_screw_hole_spacing+13.5*2,28+1,hotend_mount_depth*2],center=true);
-    // hotend plate screw holes
-    for (side=[-1,1]) {
-      translate([side*hotend_mount_screw_hole_spacing/2,0,0])
-        cylinder(r=3.2/2,$fn=72,h=total_height,center=true);
+    translate([0,0,hotend_mount_height]) rotate([0,0,22.5]) cylinder(r=da8*hotend_diam+0.5,h=hotend_mount_hole_depth*2,$fn=8,center=true);
+
+    // plate is not symmetric, skew to one side
+    translate([-1.5,0,0]) {
+      // hotend plate recess
+      cube([hotend_mount_length,hotend_mount_width,hotend_mount_height*2],center=true);
+
+      // hotend plate screw holes
+      for (side=[-1,1]) {
+        translate([side*hotend_mount_screw_hole_spacing,0,0]) {
+          // screw holes
+          cylinder(r=hotend_mount_screw_diam/2+0.05,$fn=72,h=total_height,center=true);
+          % cylinder(r=hotend_mount_screw_diam/2,$fn=72,h=10,center=true);
+
+          // captive nuts
+          translate([0,0,bottom_thickness+50]) cylinder(r=7*da6,$fn=6,h=6.4+100,center=true);
+        }
+      }
     }
   }
 
@@ -168,10 +197,10 @@ module extruder_body_holes() {
 
 module extruder_bridges(){
   // gear support bearing
-  translate([-0.5*(bearing_outer-ext_shaft_opening),0.1+bearing_height,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
+  translate([-0.5*(bearing_outer-bearing_outer)-1,0.1+bearing_height,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
 
   // hobbed support bearing
-  translate([-0.5*(bearing_outer-ext_shaft_opening),filament_y-bearing_height/2-1,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
+  translate([-0.5*(bearing_outer-bearing_outer)-1,filament_y-bearing_height/2-1,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
 }
 
 assembly();
