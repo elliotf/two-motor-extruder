@@ -46,31 +46,25 @@ total_width = motor_side + motor_side*1.4;
 total_height = motor_side + bottom_thickness;
 
 filament_from_carriage = hotend_diam / 2 + 6;
+filament_x = ext_shaft_diam/2 + 3/2 - .75;
 filament_y = total_depth - filament_from_carriage;
-filament_x = ext_shaft_diam/2 + .75;
 
 module assembly() {
   gear_assembly();
   translate([0,0,0]) extruder_body();
 
   % translate([-gear_dist,21.25,0]) rotate([90,0,0]) nema14();
-  % translate([0,ext_shaft_length/2-15,0]) rotate([90,0,0]) rotate([0,0,22.5]) cylinder(r=6/2,h=ext_shaft_length,$fn=8,center=true);
+  % translate([0,ext_shaft_length/2-15,0]) rotate([90,0,0]) rotate([0,0,22.5]) cylinder(r=ext_shaft_diam/2,h=ext_shaft_length,$fn=8,center=true);
 
   // gear support
   % translate([0,bearing_height/2,0]) rotate([90,0,0]) bearing();
 
-  // filament support bearings -- TODO: leave more room for a hobbed spacer/gear/etc?
-  % translate([0,filament_y+bearing_height+1,0]) rotate([90,0,0]) bearing();
-  % translate([0,filament_y-bearing_height-1,0]) rotate([90,0,0]) bearing();
-
-  // idler bearing
-  % translate([filament_x + bearing_outer/2 + 1.5,filament_y,0]) rotate([90,0,0]) bearing();
-
   // filament
-  % translate([filament_x,filament_y,0]) cylinder(r=3/2,h=60,center=true);
+  % translate([filament_x,filament_y,0]) cylinder(r=3/2,h=60,$fn=6,center=true);
 
   // hotend
-  % translate([filament_x,filament_y,body_bottom_pos-hotend_length/2]) cylinder(r=hotend_diam/2,h=hotend_length,center=true);
+  % translate([filament_x,filament_y,body_bottom_pos-hotend_length/2+hotend_mount_hole_depth])
+    cylinder(r=hotend_diam/2,h=hotend_length,center=true);
 
   // hotend mount plate
 }
@@ -112,13 +106,62 @@ module extruder_body_base() {
     cube([total_width,total_depth,bottom_thickness],center=true);
 }
 
+// 608zz
+idler_bearing_height = 7;
+idler_bearing_outer  = 22;
+idler_bearing_inner  = 8;
+
+//626zz
+idler_bearing_height = 6;
+idler_bearing_outer  = 19;
+idler_bearing_inner  = 6;
+
+//625zz
+idler_bearing_height = bearing_height;
+idler_bearing_outer  = bearing_outer;
+idler_bearing_inner  = bearing_inner;
+
+idler_width     = idler_bearing_height+12;
+idler_thickness = idler_bearing_inner+3+1;
+idler_length    = idler_bearing_outer+20;
+idler_shaft_diam = idler_bearing_inner;
+idler_shaft_length = idler_width*2;
+idler_x = filament_x + idler_bearing_outer/2 + 2.15;
+
+idler_crevice_width = idler_thickness + 0.5;
+idler_crevice_length = total_depth - (filament_y - idler_width/2) + .25;
+idler_crevice_x = idler_x - 0.25;
+idler_crevice_y = total_depth - idler_crevice_length / 2;
+
+module idler() {
+  difference() {
+    translate([1,0,0]) cube([idler_thickness,idler_width,idler_length],center=true);
+    rotate([90,0,0]) rotate([0,0,22.5]) cylinder(r=da8*(idler_shaft_diam),h=idler_shaft_length,$fn=8,center=true);
+    //translate([-idler_thickness/2,0,0]) cube([idler_thickness,idler_shaft_length,idler_shaft_diam],center=true);
+
+    // hole for bearing
+    cube([idler_bearing_outer,idler_bearing_height+1,idler_bearing_outer+2],center=true);
+  }
+}
+
+module idler_bearing() {
+  difference() {
+    cylinder(r=idler_bearing_outer/2,h=idler_bearing_height,center=true);
+    cylinder(r=idler_bearing_inner/2,h=idler_bearing_height*2,center=true);
+  }
+}
+
+translate([filament_x + bearing_outer/2 + 1.15,filament_y,0]) {
+  idler();
+}
+
 module extruder_body_holes() {
   // shaft hole
   translate([0,0,0]) rotate([90,0,0]) cylinder(r=ext_shaft_opening/2,h=100,$fn=36,center=true);
   translate([bearing_outer/2,motor_height/2,0]) cube([bearing_outer,motor_height*2,ext_shaft_opening],center=true);
 
   // large opening
-  translate([motor_side/2+bearing_outer/2-1,motor_height/2,motor_side/2-ext_shaft_opening/2])
+  translate([motor_side/2+bearing_outer/2-1,motor_height/2,motor_side/2-ext_shaft_opening-2])
     cube([motor_side,motor_height*2,motor_side],center=true);
 
   // filament path
@@ -127,20 +170,36 @@ module extruder_body_holes() {
   // gear-side bearing
   translate([0,bearing_height/2-0.05,0]) rotate([90,0,0]) bearing();
 
-  // carriage-side filament support bearing
-  translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,h=bearing_height*3,center=true);
-
   // gear-side filament support bearing
   translate([0,filament_y-bearing_height-1.125,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,h=bearing_height+0.25,center=true);
   translate([bearing_outer*.25,filament_y-bearing_height-1.125,0]) cube([bearing_outer/2,bearing_height+0.25,bearing_outer],center=true);
+
+  // filament support bearings -- TODO: leave more room for a hobbed spacer/gear/etc?
+  //% translate([0,filament_y+bearing_height+1,0]) rotate([90,0,0]) bearing();
+  //% translate([0,filament_y-bearing_height-1,0]) rotate([90,0,0]) bearing();
 
   // idler bearing access
   translate([bearing_outer/2+2+ext_shaft_diam/2,filament_y+bearing_height-1.25,0]) rotate([90,0,0])
     cylinder(r=bearing_outer/2+1,h=bearing_height*5,$fn=36,center=true);
 
-  // idler holder brace
-  % translate([bearing_outer/2+2+ext_shaft_diam/2,filament_y,0])
-    cube([bearing_inner+2,bearing_height+12,bearing_outer+10],center=true);
+  // carriage-side filament support bearing
+  translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,h=bearing_height*3,center=true);
+
+  // idler crevice
+  translate([idler_crevice_x,idler_crevice_y,body_bottom_pos+bottom_thickness+7])
+    cube([idler_crevice_width,idler_crevice_length,10],center=true);
+
+  // idler
+  translate([filament_x + idler_bearing_outer/2 + 1.15,filament_y,0]) {
+
+    // idler bearing
+    % rotate([90,0,0]) idler_bearing();
+
+    // total_depth - (filament_y - idler_width)
+
+    // idler crevice
+    //translate([0,0,body_bottom_pos+bottom_thickness+5]) cube([idler_thickness,idler_crevice_length,10],center=true);
+  }
 
   // motor
   translate([-gear_dist,mount_plate_thickness/2,0]) rotate([90,0,0]){
@@ -180,7 +239,7 @@ module extruder_body_holes() {
     }
   }
 
-  // filament guide holder
+  // filament guide top recess
   translate([filament_x,filament_y,motor_side/2]) rotate([0,0,22.5]) cylinder(r=6.5/2,$fn=8,h=10,center=true);
 
   // carriage mounting holes
