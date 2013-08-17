@@ -300,8 +300,15 @@ module extruder_bridges(){
   // gear support bearing
   translate([-0.5*(bearing_outer-bearing_outer)-1,0.1+bearing_height,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
 
-  // hobbed support bearing
-  translate([-0.5*(bearing_outer-bearing_outer)-1,filament_y-bearing_height/2-1,0]) cube([bearing_outer,0.3,bearing_outer],center=true);
+  // hobbed support bearing bridge
+  difference() {
+    translate([-0.5*(bearing_outer-bearing_outer)-1,filament_y-bearing_height/2-1,0])
+      cube([bearing_outer,0.3,bearing_outer],center=true);
+
+    // force the bridging direction by having two bridges
+    translate([0+ext_shaft_diam/2,filament_y-bearing_height/2-1,0])
+      cube([0.1,0.3,bearing_outer],center=true);
+  }
 }
 
 assembly();
