@@ -1,14 +1,9 @@
 da6 = 1 / cos(180 / 6) / 2;
 da8 = 1 / cos(180 / 8) / 2;
 
-// motor mount holes too small (lower $fn to 7)
-// 625zz bearing holes too small (16 too tight, try 16.2)
 // motor mount plate too thin for 8mm screws (thickness is 3)
-// hotend recessed captive nut holes too small (7mm too tight, try 7.2)
-// top filament hole and guide retainer recess seem flimsy
 // Get rid of hotend mount plate recess, or make it more shallow? -- This would let the mount plate screw holes be more sturdy
 // hotend recess diameter too large (somehow 16*da8 comes out more like 17; but it might be a good thing -- turns out it was a human problem)
-// idler screw holes too small
 
 include <gears.scad>
 include <inc/nema.scad>
@@ -40,7 +35,7 @@ hotend_mount_screw_hole_spacing = 24;
 hotend_mount_screw_diam = 4;
 hotend_mount_length = 37.5*2;
 hotend_mount_width = 28;
-hotend_mount_height = 0.75;
+hotend_mount_height = 0;
 
 mount_plate_thickness = 3;
 bottom_thickness = 7;
@@ -202,14 +197,14 @@ module extruder_body_holes() {
 
 
   // gear-side filament support bearing
-  translate([0,filament_y-bearing_height-1.125,0]) rotate([90,0,0])
-    cylinder(r=bearing_outer/2+0.1,h=bearing_height+0.25,center=true);
+  translate([0,filament_y-bearing_height-1.125,0]) {
+    rotate([90,0,0])
+      cylinder(r=bearing_outer/2+0.1,h=bearing_height+0.25,center=true);
+    % rotate([90,0,0]) bearing();
+  }
+
   translate([bearing_outer*.25,filament_y-bearing_height-1.125,0])
     cube([bearing_outer/2,bearing_height+0.25,bearing_outer+0.2],center=true);
-
-  // filament support bearings -- TODO: leave more room for a hobbed spacer/gear/etc?
-  //% translate([0,filament_y+bearing_height+1,0]) rotate([90,0,0]) bearing();
-  //% translate([0,filament_y-bearing_height-1,0]) rotate([90,0,0]) bearing();
 
   // idler bearing access
   translate([bearing_outer/2+2+ext_shaft_diam/2,filament_y+bearing_height-1.25,0]) rotate([90,0,0])
@@ -218,6 +213,7 @@ module extruder_body_holes() {
   // carriage-side filament support bearing
   translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0])
     cylinder(r=bearing_outer/2+0.1,h=bearing_height*3,center=true);
+  % translate([0,filament_y+bearing_height+1.2,0]) rotate([90,0,0]) bearing();
 
   // idler crevice
   translate([idler_crevice_x,idler_crevice_y+1,body_bottom_pos+bottom_thickness+7])
@@ -230,7 +226,7 @@ module extruder_body_holes() {
     }
   }
 
-  // captive nuts for idler screws
+  // captive nut recesses for idler screws
   translate([-4,filament_y,idler_screw_from_shaft]) {
     for (side=[-1,1]) {
       translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=5.7*da6,h=4,$fn=6,center=true);
@@ -290,10 +286,10 @@ module extruder_body_holes() {
       for (side=[-1,1]) {
         translate([side*hotend_mount_screw_hole_spacing,0,0]) {
           // screw holes
-          cylinder(r=hotend_mount_screw_diam/2+0.05,$fn=72,h=total_height,center=true);
+          cylinder(r=hotend_mount_screw_diam*da6+0.05,$fn=6,h=total_height,center=true);
           % cylinder(r=hotend_mount_screw_diam/2,$fn=72,h=10,center=true);
 
-          // captive nuts
+          // captive nut recesses for hotend mounting plate
           translate([0,0,bottom_thickness+50]) cylinder(r=7.2*da6,$fn=6,h=6.4+100,center=true);
         }
       }
