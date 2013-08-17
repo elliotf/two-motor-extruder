@@ -1,11 +1,6 @@
 da6 = 1 / cos(180 / 6) / 2;
 da8 = 1 / cos(180 / 8) / 2;
 
-// Copyright 2011 Cliff L. Biffle.
-// This file is licensed Creative Commons Attribution-ShareAlike 3.0.
-// http://creativecommons.org/licenses/by-sa/3.0/
-
-// You can get this file from http://www.thingiverse.com/thing:3575
 include <gears.scad>
 include <inc/nema.scad>
 
