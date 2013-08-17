@@ -252,6 +252,9 @@ module extruder_body_holes() {
   translate([-motor_side/2,total_depth+6,10]) {
     rotate([10,0,10]) cube([50,20,motor_side+10],center=true);
   }
+  translate([-gear_dist/2-6,mount_plate_thickness+motor_height/2,motor_side/2-12]) {
+    rotate([0,11,0]) cube([20,motor_height,motor_side+5],center=true);
+  }
 
   // right front corner
   translate([28,0,-total_height/2]) {
