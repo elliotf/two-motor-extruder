@@ -1,6 +1,14 @@
 da6 = 1 / cos(180 / 6) / 2;
 da8 = 1 / cos(180 / 8) / 2;
 
+// motor mount holes too small (lower $fn to 7)
+// 625zz bearing holes too small (16 too tight, try 16.2)
+// motor mount plate too thin for 8mm screws (thickness is 3)
+// hotend recessed captive nut holes too small (7mm too tight, try 7.2)
+// top filament hole and guide retainer recess seem flimsy
+// Get rid of hotend mount plate recess, or make it more shallow? -- This would let the mount plate screw holes be more sturdy
+// hotend recess diameter too large (somehow 16*da8 comes out more like 17; but it might be a good thing)
+
 include <gears.scad>
 include <inc/nema.scad>
 
