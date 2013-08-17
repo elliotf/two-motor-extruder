@@ -182,6 +182,9 @@ module extruder_body_holes() {
   // gear-side bearing
   translate([0,bearing_height/2-0.05,0]) rotate([90,0,0]) bearing();
 
+  // round the sharp corner from the gear-side bearing
+  translate([bearing_outer/2,bearing_height/2-0.05,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,$fn=8,h=bearing_height,center=true);
+
   // gear-side filament support bearing
   translate([0,filament_y-bearing_height-1.125,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,h=bearing_height+0.25,center=true);
   translate([bearing_outer*.25,filament_y-bearing_height-1.125,0]) cube([bearing_outer/2,bearing_height+0.25,bearing_outer],center=true);
