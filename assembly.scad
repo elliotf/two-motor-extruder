@@ -101,43 +101,36 @@ module extruder_body_base() {
     cube([total_width,total_depth,bottom_thickness],center=true);
 }
 
-// 608zz
+// 608
 idler_bearing_height = 7;
 idler_bearing_outer  = 22;
 idler_bearing_inner  = 8;
 
-//626zz
+//626
 idler_bearing_height = 6;
 idler_bearing_outer  = 19;
 idler_bearing_inner  = 6;
 
-//625zz
+//625
 idler_bearing_height = bearing_height;
 idler_bearing_outer  = bearing_outer;
 idler_bearing_inner  = bearing_inner;
 
 idler_width     = idler_bearing_height+12;
 idler_thickness = idler_bearing_inner+3+1;
-idler_length    = idler_bearing_outer+20;
+idler_length    = idler_bearing_outer+16;
 idler_shaft_diam = idler_bearing_inner;
 idler_shaft_length = idler_width*2;
 idler_x = filament_x + idler_bearing_outer/2 + 2.15;
 
+idler_screw_spacing = 10;
+idler_screw_from_shaft = 13;
+
 idler_crevice_width = idler_thickness + 0.5;
 idler_crevice_length = total_depth - (filament_y - idler_width/2) + .25;
+idler_crevice_depth = 7;
 idler_crevice_x = idler_x - 0.25;
 idler_crevice_y = total_depth - idler_crevice_length / 2;
-
-module idler() {
-  difference() {
-    translate([1,0,0]) cube([idler_thickness,idler_width,idler_length],center=true);
-    rotate([90,0,0]) rotate([0,0,22.5]) cylinder(r=da8*(idler_shaft_diam),h=idler_shaft_length,$fn=8,center=true);
-    //translate([-idler_thickness/2,0,0]) cube([idler_thickness,idler_shaft_length,idler_shaft_diam],center=true);
-
-    // hole for bearing
-    cube([idler_bearing_outer,idler_bearing_height+1,idler_bearing_outer+2],center=true);
-  }
-}
 
 module idler_bearing() {
   difference() {
@@ -146,7 +139,31 @@ module idler_bearing() {
   }
 }
 
-translate([filament_x + bearing_outer/2 + 1.15,filament_y,0]) {
+module idler() {
+  difference() {
+    translate([0,0,2]) cube([idler_thickness,idler_width,idler_length],center=true);
+
+    // holes for screws
+    for(side=[-1,1]) {
+      translate([-idler_thickness/2,idler_screw_spacing/2*side,idler_screw_from_shaft]) {
+        rotate([0,0,0]) rotate([0,90,0]) cylinder(r=3.2/2,h=idler_thickness*3,$fn=36,center=true);
+      }
+    }
+
+    translate([-1,0,0]) {
+      rotate([90,0,0]) rotate([0,0,22.5]) cylinder(r=da8*(idler_shaft_diam),h=idler_shaft_length,$fn=8,center=true);
+      //translate([-idler_thickness/2,0,0]) cube([idler_thickness,idler_shaft_length,idler_shaft_diam],center=true);
+
+      // hole for bearing
+      cube([idler_bearing_outer,idler_bearing_height+1,idler_bearing_outer+2],center=true);
+
+      // idler bearing
+      % rotate([90,0,0]) idler_bearing();
+    }
+  }
+}
+
+translate([filament_x + bearing_outer/2 + 2,filament_y,0]) {
   idler();
 }
 
@@ -181,19 +198,47 @@ module extruder_body_holes() {
   translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0]) cylinder(r=bearing_outer/2,h=bearing_height*3,center=true);
 
   // idler crevice
-  translate([idler_crevice_x,idler_crevice_y,body_bottom_pos+bottom_thickness+7])
-    cube([idler_crevice_width,idler_crevice_length,10],center=true);
+  translate([idler_crevice_x,idler_crevice_y+1,body_bottom_pos+bottom_thickness+7])
+    cube([idler_crevice_width,idler_crevice_length+2,idler_crevice_depth],center=true);
 
-  // idler
-  translate([filament_x + idler_bearing_outer/2 + 1.15,filament_y,0]) {
+  // idler screw holes for idler screws
+  translate([filament_x,filament_y,idler_screw_from_shaft]) {
+    for (side=[-1,1]) {
+      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=3.2/2,h=35,$fn=6,center=true);
+    }
+  }
 
-    // idler bearing
-    % rotate([90,0,0]) idler_bearing();
+  // captive nuts for idler screws
+  translate([-4,filament_y,idler_screw_from_shaft]) {
+    for (side=[-1,1]) {
+      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=5.7*da6,h=4,$fn=6,center=true);
+      translate([0,idler_screw_spacing/2*side,2]) cube([4,5.7,6],center=true);
+    }
+  }
 
-    // total_depth - (filament_y - idler_width)
+  // material saving
 
-    // idler crevice
-    //translate([0,0,body_bottom_pos+bottom_thickness+5]) cube([idler_thickness,idler_crevice_length,10],center=true);
+  // top right of large gear
+  translate([10,0,motor_side/2+5]) {
+    rotate([15,40,0]) cube([22,40,22],center=true);
+  }
+
+  // right front corner
+  translate([40,0,-10]) {
+    rotate([15,30,0]) cube([40,50,20],center=true);
+  }
+  translate([40,0,-27]) {
+    rotate([-15,-30,0]) cube([50,40,20],center=true);
+  }
+  translate([37,0,-total_height/2]) {
+    rotate([0,0,-12]) cube([20,60,30],center=true);
+  }
+
+  translate([-gear_dist-motor_side/2,total_depth/2,body_bottom_pos-3.75]) {
+    rotate([10,40,0]) cube([30,total_height*2,20],center=true);
+  }
+  translate([-gear_dist-motor_side/2,0,motor_side/2]) {
+    rotate([0,45,0]) cube([5,10,10],center=true);
   }
 
   // motor
@@ -208,7 +253,6 @@ module extruder_body_holes() {
       }
     }
   }
-
 
   // hotend
   translate([filament_x,filament_y,body_bottom_pos]) {
