@@ -215,7 +215,7 @@ module extruder_body_holes() {
   // idler screw holes for idler screws
   translate([filament_x,filament_y,idler_screw_from_shaft]) {
     for (side=[-1,1]) {
-      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=3.2/2,h=35,$fn=6,center=true);
+      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=3.2/2,h=45,$fn=6,center=true);
     }
   }
 
