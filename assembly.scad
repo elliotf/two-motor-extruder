@@ -353,13 +353,13 @@ module extruder_bridges(){
     cube([bearing_outer,bridge_thickness,bearing_outer],center=true);
 
   // hobbed support bearing bridge
-  translate([0,bridge_thickness/2+filament_y-bearing_height/2-1,0]) {
+  translate([0,bridge_thickness/2+filament_y-bearing_height/2-1.25,0]) {
     difference() {
       translate([-0.5*(bearing_outer-bearing_outer)-1,0,0])
         cube([bearing_outer,bridge_thickness,bearing_outer],center=true);
 
       // force the bridging direction by having two bridges
-      cube([0.1,bridge_thickness*2,bearing_outer],center=true);
+      translate([0+ext_shaft_diam/2,0,0]) cube([0.1,bridge_thickness*2,bearing_outer],center=true);
     }
   }
 }
