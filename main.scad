@@ -231,14 +231,14 @@ module extruder_body_holes() {
   translate([0,bearing_height,0]) {
     rotate([90,0,0])
       cylinder(r=bearing_outer/2-1,h=20,center=true);
-    translate([bearing_outer/2,0,0]) cube([bearing_outer-2,20,bearing_outer-4],center=true);
+    translate([bearing_outer/2,0,0]) cube([bearing_outer-2,20,bearing_outer-2.5],center=true);
   }
   translate([bearing_outer*.25,filament_y-bearing_height-1.5,0])
     cube([bearing_outer/2+0.1,bearing_height+1,bearing_outer+0.2],center=true);
 
   // idler bearing access
-  translate([bearing_outer/2+ext_shaft_diam/2+filament_x-4,filament_y+bearing_height-1.25,0]) rotate([90,0,0]) rotate([0,0,22.5])
-    cylinder(r=bearing_outer/2+1,h=bearing_height*5,$fn=8,center=true);
+  translate([bearing_outer/2+ext_shaft_diam/2+filament_x-4,filament_y,0]) rotate([90,0,0]) rotate([0,0,22.5])
+    cylinder(r=bearing_outer/2+1.052,h=total_depth*2,$fn=8,center=true);
 
   // carriage-side filament support bearing
   translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0])
@@ -267,8 +267,11 @@ module extruder_body_holes() {
   // material saving
 
   // top center front by large gear
-  translate([10,0,motor_side/2+4]) {
+  translate([10,0,motor_side/2+4.4]) {
     rotate([20,25,0]) cube([40,50,22],center=true);
+  }
+  translate([17.5,0,bearing_outer/2]) {
+    rotate([10,0,65]) cube([10,20,10],center=true);
   }
   // bottom front
   translate([filament_x+4,-15,body_bottom_pos-7]) {
@@ -382,13 +385,13 @@ bridge_thickness = 0.3;
 module bridges(){
   // gear support bearing
   translate([-0.5*(bearing_outer-bearing_outer)-1,bearing_height+bridge_thickness/3,0])
-    cube([bearing_outer,bridge_thickness,bearing_outer],center=true);
+    cube([bearing_outer,bridge_thickness,bearing_outer+1],center=true);
 
   // hobbed support bearing bridge
   translate([0,bridge_thickness/2+filament_y-bearing_height/2-1.25,0]) {
     difference() {
       translate([-0.5*(bearing_outer-bearing_outer)-1,0,0])
-        cube([bearing_outer,bridge_thickness,bearing_outer],center=true);
+        cube([bearing_outer,bridge_thickness,bearing_outer+1],center=true);
 
       // force the bridging direction by having two bridges
       translate([0+ext_shaft_diam/2+0.05,0,0]) cube([0.1,bridge_thickness*2,bearing_outer],center=true);
