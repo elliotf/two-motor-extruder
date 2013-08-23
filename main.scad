@@ -11,6 +11,9 @@ da8 = 1 / cos(180 / 8) / 2;
 include <gears.scad>
 include <inc/nema.scad>
 
+extrusion_width = 0.6;
+extrusion_height = 0.3;
+
 // 608
 bearing_height = 7;
 bearing_outer  = 22;
@@ -394,9 +397,10 @@ module bridges(){
         cube([bearing_outer,bridge_thickness,bearing_outer+1],center=true);
 
       // force the bridging direction by having two bridges
-      translate([0+ext_shaft_diam/2+0.05,0,0]) cube([0.1,bridge_thickness*2,bearing_outer],center=true);
+      translate([0+ext_shaft_diam/2+0.05-extrusion_width,0,0]) cube([0.1,bridge_thickness*2,bearing_outer],center=true);
     }
-    % translate([3.1,0,0]) cube([0.6*9,bridge_thickness*2,2]);
+    // make sure bridge width is a multiple of the extrusion width
+    % translate([3.1-extrusion_width*1,0,0]) cube([extrusion_width*10,bridge_thickness*2,2]);
   }
 
   // carriage mounting hole diameter drop
