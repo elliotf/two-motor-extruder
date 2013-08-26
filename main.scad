@@ -412,22 +412,6 @@ module bridges(){
   translate([-0.5*(bearing_outer-bearing_outer)-1,bearing_height+bridge_thickness/3,0])
     cube([bearing_outer,bridge_thickness,bearing_outer+1],center=true);
 
-  // hobbed support bearing bridge
-  /*
-  translate([0,bridge_thickness/2+filament_y-bearing_height/2-1.25,0]) {
-    difference() {
-      translate([-0.5*(bearing_outer-bearing_outer)-1,0,0])
-        cube([bearing_outer,bridge_thickness,bearing_outer+1],center=true);
-
-      // force the bridging direction by having two bridges
-      //translate([0+ext_shaft_diam/2+0.05-extrusion_width*2,0,0]) cube([0.1,bridge_thickness*2,bearing_outer+2],center=true);
-      //translate([0+ext_shaft_diam/2+0.05-extrusion_width*0,0,0]) cube([0.1,bridge_thickness*2,bearing_outer+2],center=true);
-    }
-    // make sure bridge width is a multiple of the extrusion width
-    //% translate([3.1-extrusion_width*2,0,0]) cube([extrusion_width*11,bridge_thickness*2,2]);
-  }
-  */
-
   // carriage mounting hole diameter drop
   translate([filament_x,total_depth-carriage_hole_support_thickness,body_bottom_pos+bottom_thickness/2+1]) {
     for (side=[-1,1]) {
