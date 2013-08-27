@@ -92,7 +92,7 @@ module assembly() {
 
   //translate([idler_crevice_x,filament_y,idler_crevice_z - idler_crevice_depth/2 + idler_length/2]) {
   translate([idler_crevice_x,filament_y,0.05]) {
-    % idler();
+    idler();
   }
 }
 
@@ -446,7 +446,20 @@ module bridges(){
   }
 }
 
+module full_assembly() {
+  assembly();
+
+  translate([-gear_dist,-3.5,0]) {
+    rotate([90,0,0]) small_gear();
+  }
+
+  translate([0,-10,0]) {
+    rotate([-90,0,0]) large_gear();
+  }
+}
+
 //rotate([90,0,0]) assembly();
 //rotate([0,90,0]) idler();
+//full_assembly();
 assembly();
 //idler();
