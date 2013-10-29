@@ -1,5 +1,5 @@
 // You can get this file from http://www.thingiverse.com/thing:3575
-use <../main.scad>
+use <../scad/main.scad>
 
 translate([-10,0,0]) rotate([90,0,0]) extruder_body();
 
