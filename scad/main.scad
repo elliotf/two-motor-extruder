@@ -131,19 +131,6 @@ module extruder_body_base() {
   // bottom
   translate([-motor_side*0.3,total_depth/2,body_bottom_pos+bottom_thickness/2])
     cube([total_width,total_depth,bottom_thickness],center=true);
-
-  // additional material for idler screw holes
-  translate([filament_x,filament_y,idler_screw_from_shaft-4]) {
-    for (side=[-1,1]) {
-      translate([0,(idler_screw_spacing/2)*side,0]) rotate([0,90,0]) scale([1,1.5,1])
-        cylinder(r=idler_screw_nut_diam+6*da6,h=45,$fn=8,center=true);
-    }
-  }
-
-  // bolster hotend mounting hole
-  translate([filament_x+hotend_mount_screw_hole_spacing,filament_y,-bottom_thickness/2]) {
-    cylinder(r=hotend_mount_screw_nut*da6+0.5,h=total_height,$fn=6,center=true);
-  }
 }
 
 // 608
@@ -305,64 +292,7 @@ module extruder_body_holes() {
     }
   }
 
-  // material saving
-
-  // top center front by large gear
-  translate([10,0,motor_side/2+5.25]) {
-    rotate([22,20,0]) cube([40,50,22],center=true);
-  }
-  translate([17.5,0,bearing_outer/2]) {
-    rotate([10,0,65]) cube([10,20,10],center=true);
-  }
-  // bottom front
-  translate([filament_x+4,-15,body_bottom_pos-7]) {
-    rotate([60,0,0]) cylinder(r=20,h=100,center=true);
-  }
-
-  // center back
-  translate([0,total_depth+5.5,motor_side/2+2]) {
-    rotate([15,0,0]) cube([50,20,50],center=true);
-  }
-  translate([-motor_side/2,total_depth+6,10]) {
-    rotate([10,0,10]) cube([50,20,motor_side+10],center=true);
-  }
-
-  // space between motor and extruder shaft
-  translate([-gear_dist/2-6,mount_plate_thickness+motor_height/2+10,motor_side/2-12]) {
-    rotate([0,10.5,0]) cube([20,motor_height+20,motor_side+8],center=true);
-  }
-
-  // right front corner
-  translate([31,0,-total_height/2]) {
-    rotate([0,0,-30]) cube([20,60,30],center=true);
-  }
-  // bottom
-  translate([17.5,-8,body_bottom_pos/2]) {
-    rotate([0,0,45]) cube([70,20,40],center=true);
-  }
-  translate([18,-7,body_bottom_pos/2]) {
-    rotate([-20,0,40]) cube([60,20,40],center=true);
-  }
-
-  // right rear corner
-  translate([35.75,total_depth,body_bottom_pos]) {
-    rotate([0,0,30]) cube([20,40,60],center=true);
-  }
-
-  // bottom motor end
-  translate([-gear_dist-motor_side/2,total_depth/2,body_bottom_pos-3.75]) {
-    rotate([10,40,0]) cube([30,total_height*2,20],center=true);
-  }
-  translate([-gear_dist-motor_side/2+21,total_depth,body_bottom_pos]) {
-    rotate([0,0,47]) cube([total_depth*3,20,20],center=true);
-  }
-
-  // top motor end
-  translate([-gear_dist-motor_side/2,0,motor_side/2]) {
-    rotate([0,45,0]) cube([5,10,10],center=true);
-  }
-
-  // motor
+  // motor holes
   translate([-gear_dist,mount_plate_thickness/2,0]) rotate([90,0,0]){
     // motor shoulder
     cylinder(r=motor_shoulder_diam/2+1,h=mount_plate_thickness*2,center=true);
