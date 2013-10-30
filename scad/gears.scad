@@ -27,6 +27,10 @@ ext_shaft_nut_height = 3.5;
 // Here's an example.
 large_tooth_num = 49;
 small_tooth_num = 9;
+/* use this ratio for NEMA17?
+large_tooth_num = 34;
+small_tooth_num = 13;
+*/
 gear_dist = 35;
 // printed 51 and 9
 // 7 and 41
