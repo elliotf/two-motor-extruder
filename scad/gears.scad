@@ -6,8 +6,9 @@ da8 = 1 / cos(180 / 8) / 2;
 // http://creativecommons.org/licenses/by-sa/3.0/
 
 // You can get this file from http://www.thingiverse.com/thing:3575
+use <config.scad>
 use <inc/parametric_involute_gear_v5.0.scad>
-use <inc/nema.scad>
+//use <inc/nema.scad>
 use <inc/spur_generator.scad>
 
 //include <configuration.scad>
