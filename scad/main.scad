@@ -298,7 +298,7 @@ module bridges(){
 
   // hobbed support bearing bridge
   translate([main_body_x,filament_y-hobbed_width/2+bridge_thickness/2,0]) {
-    cube([main_body_width,bridge_thickness,bearing_outer+2],center=true);
+    cube([main_body_width,bridge_thickness,bearing_outer+4],center=true);
   }
 
   // carriage mounting hole diameter drop
