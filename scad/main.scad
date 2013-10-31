@@ -28,8 +28,9 @@ idler_screw_spacing = (idler_width - idler_bearing_height - 2);
 idler_crevice_width = idler_thickness + .5;
 idler_crevice_length = total_depth - (filament_y - idler_width/2) + 2;
 idler_crevice_depth = 2.5;
+idler_crevice_depth = ext_shaft_hotend_dist -bearing_outer/2;
 idler_crevice_x = idler_x - .25;
-idler_crevice_y = total_depth - idler_crevice_length / 2 + 0.5;
+idler_crevice_y = total_depth - idler_crevice_length / 2;
 idler_crevice_z = body_bottom_pos+bottom_thickness+idler_crevice_depth/2;
 
 idler_lower_half = ext_shaft_hotend_dist;
@@ -216,7 +217,7 @@ module idler() {
 
 module extruder_body_holes() {
   // shaft hole
-  translate([0,total_depth/2,0]) rotate([90,0,0])
+  translate([0,total_depth/2,0]) rotate([90,0,0]) rotate([0,0,11.25])
     hole(ext_shaft_opening,total_depth);
   translate([bearing_outer/2,motor_len/2,0])
     cube([bearing_outer,motor_len*2,ext_shaft_opening],center=true);
@@ -226,7 +227,7 @@ module extruder_body_holes() {
 
   translate([0,gear_side_bearing_y,0]) {
     // gear-side bearing
-    rotate([90,0,0]) hole(bearing_outer,bearing_height);
+    rotate([90,0,0]) rotate([0,0,11.25]) hole(bearing_outer,bearing_height);
 
     % translate([0,0,0]) rotate([90,0,0]) bearing();
   }
@@ -236,26 +237,27 @@ module extruder_body_holes() {
   */
   hobbed_opening_len = 14;
   translate([0,filament_y-hobbed_width/2-hobbed_opening_len/2,0]) {
-    rotate([90,0,0])
+    rotate([90,0,0]) rotate([0,0,11.25])
       hole(bearing_outer,hobbed_opening_len);
     translate([accurate_diam(bearing_outer)/2,0,0])
-      cube([accurate_diam(bearing_outer),hobbed_opening_len,accurate_diam(bearing_outer)],center=true);
+      cube([bearing_outer,hobbed_opening_len,bearing_outer],center=true);
   }
 
   // idler bearing access
-  translate([filament_x+idler_bearing_outer/2-filament_diam/2,gear_side_bearing_y+bearing_height/2+extrusion_height+total_depth/2,0]) rotate([90,0,0]) rotate([0,0,22.5])
-    hole(bearing_outer+spacer,total_depth,8);
+  //translate([filament_x+idler_bearing_outer/2-filament_diam/2,gear_side_bearing_y+bearing_height/2+extrusion_height+total_depth/2+10,0]) rotate([90,0,0]) rotate([0,0,22.5])
+  translate([filament_x+idler_bearing_outer/2-filament_diam/2,total_depth,0]) rotate([90,0,0]) rotate([0,0,22.5])
+    hole(bearing_outer,idler_crevice_length*2,8);
 
   // carriage-side filament support bearing
-  translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0])
+  translate([0,filament_y+bearing_height*2+1,0]) rotate([90,0,0]) rotate([0,0,11.25])
     hole(bearing_outer,bearing_height*3);
   //% translate([0,filament_y+hobbed_width/2+bearing_height/2,0]) rotate([90,0,0]) bearing();
 
   // idler crevice
   /*
     */
-  translate([idler_crevice_x,idler_crevice_y,idler_crevice_z])
-    cube([idler_crevice_width,idler_crevice_length,idler_crevice_depth+0.05],center=true);
+  translate([idler_crevice_x,total_depth,idler_crevice_z])
+    cube([idler_crevice_width,idler_crevice_length*2,idler_crevice_depth+0.05],center=true);
 
   // idler screw holes for idler screws
   translate([filament_x,filament_y,idler_screw_from_shaft]) {

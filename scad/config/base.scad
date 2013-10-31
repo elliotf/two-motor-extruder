@@ -72,7 +72,7 @@ motor_shoulder_diam = nema14_shoulder_diam;
 */
 
 // Misc settings
-extrusion_width = 0.66;
+extrusion_width = 0.5;
 extrusion_height = 0.3;
 min_material_thickness = extrusion_width*4;
 spacer = 1;

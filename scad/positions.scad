@@ -10,7 +10,7 @@ ext_shaft_hotend_dist = bearing_outer/2 + 3;
 
 body_bottom_pos = -ext_shaft_hotend_dist-bottom_thickness;
 
-main_body_width = min_material_thickness/2+filament_diam/2+filament_x+bearing_outer/2+min_material_thickness;
+main_body_width = min_material_thickness+filament_diam/2+filament_x+bearing_outer/2+min_material_thickness;
 main_body_height = ext_shaft_hotend_dist + idler_screw_from_shaft + idler_screw_nut_diam/2 + min_material_thickness;
 main_body_x = -bearing_outer/2-min_material_thickness/2+main_body_width/2;
 main_body_z = body_bottom_pos+bottom_thickness+main_body_height/2;
