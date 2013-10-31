@@ -244,7 +244,6 @@ module extruder_body_holes() {
   }
 
   // idler bearing access
-  //translate([filament_x+idler_bearing_outer/2-filament_diam/2,gear_side_bearing_y+bearing_height/2+extrusion_height+total_depth/2+10,0]) rotate([90,0,0]) rotate([0,0,22.5])
   translate([filament_x+idler_bearing_outer/2-filament_diam/2,total_depth,0]) rotate([90,0,0]) rotate([0,0,22.5])
     hole(bearing_outer,idler_crevice_length*2,8);
 
