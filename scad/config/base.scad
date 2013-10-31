@@ -60,6 +60,7 @@ motor_shoulder_height = nema17_shoulder_height;
 motor_shoulder_diam = nema17_shoulder_diam;
 
 /*
+*/
 motor_side = nema14_side;
 motor_len = nema14_len;
 motor_hole_spacing = nema14_hole_spacing;
@@ -69,7 +70,6 @@ motor_shaft_len = nema14_shaft_len;
 motor_short_shaft_len = nema14_short_shaft_len;
 motor_shoulder_height = nema14_shoulder_height;
 motor_shoulder_diam = nema14_shoulder_diam;
-*/
 
 // Misc settings
 extrusion_width = 0.5;
