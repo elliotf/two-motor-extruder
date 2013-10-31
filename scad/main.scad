@@ -123,8 +123,51 @@ module extruder_body() {
   difference() {
     extruder_body_base();
     extruder_body_holes();
+    material_savings();
   }
   color("lightblue") bridges();
+}
+
+module material_savings() {
+  translate([bearing_outer/2+8,0,0]) rotate([0,0,-40]) {
+    // right front
+    translate([total_depth,0,body_bottom_pos+bottom_thickness/2])
+      cube([total_depth*2,total_depth*3,total_depth],center=true);
+
+    // right front top
+    translate([0,0,body_bottom_pos+bottom_thickness]) rotate([0,-45,0]) translate([bottom_thickness-0.5,0,0])
+      cube([bottom_thickness*2,total_depth*3,bottom_thickness*1.25],center=true);
+
+    // right front bottom
+    translate([0,0,body_bottom_pos]) rotate([0,45,0]) translate([bottom_thickness-0.5,0,0])
+      cube([bottom_thickness*2,total_depth*3,bottom_thickness*1.25],center=true);
+  }
+
+  translate([motor_x-motor_side/2,mount_plate_thickness,0]) rotate([0,0,-40]) {
+    // left rear
+    translate([-total_depth,0,body_bottom_pos+bottom_thickness/2])
+      cube([total_depth*2,total_depth*3,total_depth],center=true);
+
+    /*
+    // right rear top
+    translate([0,0,body_bottom_pos+bottom_thickness]) rotate([0,45,0]) translate([-total_depth+1,0,0])
+      cube([total_depth*2,total_depth*3,bottom_thickness*1.25],center=true);
+      */
+
+    // right rear bottom
+    translate([0,0,body_bottom_pos]) rotate([0,-45,0]) translate([-bottom_thickness+1,0,0])
+      cube([bottom_thickness*2,total_depth*3,bottom_thickness*1.25],center=true);
+  }
+
+  // left front bottom rounded
+  translate([motor_x-motor_side/2,0,body_bottom_pos+bottom_thickness/2]) rotate([0,-45,0])
+    translate([-bottom_thickness,0,0])
+      cube([bottom_thickness*2,total_depth*3,bottom_thickness*2],center=true);
+
+  // left front top rounded
+  translate([motor_x-motor_side/2,0,body_bottom_pos+bottom_thickness+motor_side]) rotate([0,45,0])
+    translate([-bottom_thickness+2,0,0])
+      cube([bottom_thickness*2,total_depth*3,bottom_thickness*2],center=true);
 }
 
 module idler_bearing() {
@@ -191,7 +234,7 @@ module extruder_body_holes() {
   // hobbed area opening
   /*
   */
-  hobbed_opening_len = 10;
+  hobbed_opening_len = 14;
   translate([0,filament_y-hobbed_width/2-hobbed_opening_len/2,0]) {
     rotate([90,0,0])
       hole(bearing_outer,hobbed_opening_len);
