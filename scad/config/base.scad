@@ -29,8 +29,8 @@ m5_nut_thickness = 5;
 
 // Motors
 nema17_side = 43;
-nema17_len = 48;
 nema17_len = 36; // "half-length" nema 17
+nema17_len = 48;
 nema17_hole_spacing = 31;
 nema17_screw_diam = m3_diam;
 nema17_shaft_diam = 5;
