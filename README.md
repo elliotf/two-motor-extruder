@@ -8,3 +8,10 @@ This is an *UNTESTED* work in progress of a NEMA14/NEMA17 geared extruder for 3m
 * I still have a lot of 3mm filament
 * The parametric design should allow for NEMA17 version, 5mm shaft, 6mm shaft, 8mm shaft
 * It's a challenge!
+
+# TODO
+* generate gears based on:
+  * desired steps/mm
+  * hobbed bolt/gear diameter
+  * nema14 or nema17
+  * accounting for a minimum number of teeth
