@@ -29,8 +29,8 @@ large_tooth_num = 49;
 small_tooth_num = 9;
 /* use this ratio for NEMA17?
 */
-large_tooth_num = 39;
-small_tooth_num = 16;
+large_tooth_num = 38;
+small_tooth_num = 13;
 gear_dist = 35;
 // printed 51 and 9
 // 7 and 41
@@ -41,7 +41,7 @@ gear_pitch = fit_spur_gears(large_tooth_num, small_tooth_num, gear_dist);
 small_tooth_height = 7;
 small_gear_height  = 15;
 
-large_gear_thickness = 6;
+large_gear_thickness = small_tooth_height;
 
 module large_gear() {
   difference() {
@@ -51,8 +51,8 @@ module large_gear() {
       rim_thickness = large_gear_thickness,
       rim_width = 3,
       //hub_thickness = 17,
-      hub_thickness = large_gear_thickness-1+ext_shaft_nut_height,
-      hub_diameter = ext_shaft_nut_diam + 5,
+      hub_thickness = large_gear_thickness-0.5+ext_shaft_nut_height,
+      hub_diameter = ext_shaft_nut_diam + 7,
       number_of_teeth = large_tooth_num,
       circles=4,
       bore_diameter = 0);
@@ -75,7 +75,7 @@ module small_gear() {
       number_of_teeth = small_tooth_num,
       rim_width       = 2,
       bore_diameter   = 0,
-      hub_diameter    = 25
+      hub_diameter    = 21
     );
 
     // flatted motor hole

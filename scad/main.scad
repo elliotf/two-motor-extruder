@@ -366,5 +366,5 @@ module full_assembly() {
   }
 }
 
-//full_assembly();
-assembly();
+full_assembly();
+//assembly();
