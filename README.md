@@ -1,4 +1,4 @@
-This is an *UNTESTED* work in progress of a NEMA14 geared extruder for 3mm filament, inspired by kliment's and sgraber's compact i3 extruder.
+This is an *UNTESTED* work in progress of a NEMA14/NEMA17 geared extruder for 3mm filament, inspired by kliment's and sgraber's compact i3 extruder.
 
 # Why?
 
