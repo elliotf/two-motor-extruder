@@ -196,9 +196,9 @@ module idler() {
       translate([(idler_thickness)/2,idler_screw_spacing/2*side,idler_screw_from_shaft]) {
         hull() {
           rotate([0,-85,0]) translate([0,0,(idler_thickness)/2+1]) rotate([0,0,90])
-            cylinder(r=idler_screw_diam*da6,h=idler_thickness+2.05,center=true);
+            hole(idler_screw_diam,idler_thickness+2.05,6);
           rotate([0,-95,0]) translate([0,0,(idler_thickness)/2+1]) rotate([0,0,90])
-            cylinder(r=idler_screw_diam*da6,h=idler_thickness+2.05,center=true);
+            hole(idler_screw_diam,idler_thickness+2.05,6);
         }
       }
     }
@@ -223,7 +223,8 @@ module extruder_body_holes() {
     cube([bearing_outer,motor_len*2,ext_shaft_opening],center=true);
 
   // filament path
-  translate([filament_x,filament_y,0]) rotate([0,0,22.5]) cylinder(r=da8*(filament_diam*1.25),$fn=8,h=50,center=true);
+  translate([filament_x,filament_y,0]) rotate([0,0,22.5])
+    hole(filament_diam+1,50,8);
 
   translate([0,gear_side_bearing_y,0]) {
     // gear-side bearing
@@ -261,16 +262,18 @@ module extruder_body_holes() {
   // idler screw holes for idler screws
   translate([filament_x,filament_y,idler_screw_from_shaft]) {
     for (side=[-1,1]) {
-      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=idler_screw_diam*da6,h=45,$fn=6,center=true);
+      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0])
+        hole(idler_screw_diam,45,6);
     }
   }
 
   // captive nut recesses for idler screws
   translate([-2.5,filament_y,idler_screw_from_shaft]) {
     for (side=[-1,1]) {
-      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=idler_screw_nut_diam*da6,h=4,$fn=6,center=true);
-      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0]) cylinder(r=idler_screw_nut_diam*da6,h=4,$fn=6,center=true);
-      translate([0,idler_screw_spacing/2*side,5]) cube([4,idler_screw_nut_diam,10],center=true);
+      translate([0,idler_screw_spacing/2*side,0]) rotate([0,90,0])
+        hole(idler_screw_nut_diam,idler_screw_nut_thickness+spacer*1.5,6);
+      translate([0,idler_screw_spacing/2*side,5])
+        cube([idler_screw_nut_thickness+spacer*1.5,idler_screw_nut_diam,10],center=true);
     }
   }
 

@@ -28,9 +28,9 @@ ext_shaft_nut_height = 3.5;
 large_tooth_num = 49;
 small_tooth_num = 9;
 /* use this ratio for NEMA17?
-large_tooth_num = 34;
-small_tooth_num = 13;
 */
+large_tooth_num = 39;
+small_tooth_num = 16;
 gear_dist = 35;
 // printed 51 and 9
 // 7 and 41
@@ -75,7 +75,7 @@ module small_gear() {
       number_of_teeth = small_tooth_num,
       rim_width       = 2,
       bore_diameter   = 0,
-      hub_diameter    = 15
+      hub_diameter    = 25
     );
 
     // flatted motor hole
@@ -91,7 +91,7 @@ module small_gear() {
     translate([2.25,0,small_gear_height-3.5]) {
       rotate([0,90,0]) cylinder(r=set_screw_nut_diam*da6,h=5,$fn=6,center=true);
       translate([0,0,2.1]) cube([5,set_screw_nut_diam,3],center=true);
-      translate([1,0,0]) rotate([90,0,0]) rotate([0,90,0]) cylinder(r=3*da6,h=9,$fn=6,center=true);
+      translate([10,0,0]) rotate([90,0,0]) rotate([0,90,0]) cylinder(r=3*da6,h=20,$fn=6,center=true);
       //% translate([1.25,0,0]) rotate([0,90,0]) cylinder(r=5.5*da6,h=2.5,$fn=6,center=true);
     }
   }
