@@ -3,6 +3,7 @@ da6 = 1 / cos(180 / 6) / 2;
 da8 = 1 / cos(180 / 8) / 2;
 
 approx_pi = 3.14159;
+resolution = 32;
 
 // make coordinates more communicative
 left  = -1;
@@ -126,14 +127,15 @@ idler_bearing_inner  = bearing_inner;
 
 filament_diam = 3;
 
-mount_plate_thickness = 3;
+mount_plate_thickness = 10;
 bottom_thickness = m3_socket_head_diam + min_material_thickness;
 
 ext_shaft_length  = 60;
 hobbed_diam = 8;
 hobbed_width = 7;
 ext_shaft_diam = bearing_inner;
-ext_shaft_opening = hobbed_diam + 1;
+bearing_opening   = bearing_outer - 1;
+ext_shaft_opening = hobbed_diam + 4;
 
 carriage_hole_spacing = 30;
 carriage_hole_small_diam    = m3_diam;
@@ -149,6 +151,10 @@ hotend_mount_screw_nut = 7.3;
 hotend_mount_length = 37.5*2;
 hotend_mount_width = 28;
 hotend_mount_height = 0;
+
+hotend_height_above_groove   = 4.8;
+hotend_groove_height         = 4.6;
+hotend_groove_diam           = 12;
 
 filament_from_carriage = hotend_diam / 2 + 8; // make sure the hotend can clear the carriage
 filament_x = hobbed_diam/2 + filament_diam/2 - .6;

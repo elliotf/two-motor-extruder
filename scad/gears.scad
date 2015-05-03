@@ -6,9 +6,9 @@ da8 = 1 / cos(180 / 8) / 2;
 // http://creativecommons.org/licenses/by-sa/3.0/
 
 // You can get this file from http://www.thingiverse.com/thing:3575
-use <config.scad>
+include <config.scad>
+include <positions.scad>
 use <inc/parametric_involute_gear_v5.0.scad>
-//use <inc/nema.scad>
 use <inc/spur_generator.scad>
 
 //include <configuration.scad>
@@ -31,7 +31,6 @@ small_tooth_num = 9;
 */
 large_tooth_num = 38;
 small_tooth_num = 13;
-gear_dist = 35;
 // printed 51 and 9
 // 7 and 41
 // 9 and 41
@@ -41,7 +40,7 @@ gear_pitch = fit_spur_gears(large_tooth_num, small_tooth_num, gear_dist);
 small_tooth_height = 7;
 small_gear_height  = 15;
 
-large_gear_thickness = small_tooth_height;
+large_gear_thickness = small_tooth_height+ext_shaft_nut_height/2;
 
 module large_gear() {
   difference() {
@@ -51,13 +50,13 @@ module large_gear() {
       rim_thickness = large_gear_thickness,
       rim_width = 3,
       //hub_thickness = 17,
-      hub_thickness = large_gear_thickness-0.5+ext_shaft_nut_height,
+      hub_thickness = 0, //large_gear_thickness-0.5+ext_shaft_nut_height,
       hub_diameter = ext_shaft_nut_diam + 7,
       number_of_teeth = large_tooth_num,
       circles=4,
       bore_diameter = 0);
     cylinder(r=ext_shaft_diam/2,$fn=36,h=50,center=true);
-    translate([0,0,large_gear_thickness-1+ext_shaft_nut_height]) {
+    translate([0,0,large_gear_thickness-ext_shaft_nut_height/2]) {
       cylinder(r=da6*ext_shaft_nut_diam,h=ext_shaft_nut_height*2,center=true,$fn=6); // nut trap for m6 nut
     }
   }
