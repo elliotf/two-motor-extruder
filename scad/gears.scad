@@ -1,3 +1,5 @@
+use <util.scad>;
+
 da6 = 1 / cos(180 / 6) / 2;
 da8 = 1 / cos(180 / 8) / 2;
 
@@ -57,7 +59,8 @@ module large_gear() {
       bore_diameter = 0);
     cylinder(r=ext_shaft_diam/2,$fn=36,h=50,center=true);
     translate([0,0,large_gear_thickness-ext_shaft_nut_height/2]) {
-      cylinder(r=da6*ext_shaft_nut_diam,h=ext_shaft_nut_height*2,center=true,$fn=6); // nut trap for m6 nut
+      //cylinder(r=da6*ext_shaft_nut_diam,h=ext_shaft_nut_height*2,center=true,$fn=6); // nut trap for m6 nut
+      hole(ext_shaft_nut_diam,ext_shaft_nut_height*2,6); // nut trap for m6 nut
     }
   }
 }

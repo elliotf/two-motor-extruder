@@ -1,39 +1,7 @@
-// Get rid of hotend mount plate recess, or make it more shallow? -- This would let the mount plate screw holes be more sturdy
-// hotend recess diameter too large (somehow 16*da8 comes out more like 17; but it might be a good thing -- turns out it was a human problem)
-// tricky bridge near filament broken again; need to make sure lone bridge is a multiple of filament width
-// provide bridging for the carriage mount holes (going from larger to smaller diameter)
-// hobbed bolt is in the filament path too much (was 0.75 into the filament, going to 0.5)
-
 include <util.scad>
 include <config.scad>
-use <gears.scad>
 include <positions.scad>
-
-idler_bearing_outer     = 10;
-idler_bearing_inner     = 5;
-idler_bearing_thickness = 4;
-idler_nut_diam          = 8;
-
-
-idler_width     = idler_bearing_height+14;
-idler_thickness = idler_bearing_inner+3+1;
-idler_shaft_diam = idler_bearing_inner;
-idler_shaft_length = idler_width*2;
-idler_x = filament_x + idler_bearing_outer/2 + filament_diam/2;
-
-idler_screw_spacing = (idler_width - idler_bearing_height - 2);
-
-idler_lower_half = ext_shaft_hotend_dist;
-idler_upper_half = idler_screw_from_shaft+idler_screw_diam/2+3;
-idler_thumb_lever_thickness = 3;
-idler_thumb_lever_length = 6;
-
-filament_y = total_depth - filament_from_carriage;
-filament_y = mount_plate_thickness + idler_screw_diam/2 + idler_screw_spacing/2 + extrusion_height;
-
-total_depth = mount_plate_thickness + motor_len/2 + 1;
-total_depth = filament_y + idler_screw_spacing/2 + idler_screw_nut_diam/2 + idler_bearing_height;
-total_height = motor_side + bottom_thickness;
+use <gears.scad>
 
 module motor() {
   translate([0,0,-motor_len/2]) {
@@ -53,6 +21,14 @@ module motor() {
   }
 }
 
+module position_motor() {
+  translate([motor_x,motor_y,motor_z]) {
+    rotate([90,0,0]) {
+      children();
+    }
+  }
+}
+
 module assembly() {
   translate([0,0,0]) extruder_body();
 
@@ -60,8 +36,9 @@ module assembly() {
   % position_motor() motor();
 
   // extruder shaft
-  % translate([0,ext_shaft_length/2-15,0]) rotate([90,0,0])
-    cylinder(r=ext_shaft_diam/2,h=ext_shaft_length,center=true);
+  % translate([0,ext_shaft_length/2-15,0]) rotate([90,0,0]) {
+    hole(ext_shaft_diam,ext_shaft_length);
+  }
 
   // hobbed whatnot
   % translate([0,filament_y,0]) rotate([90,0,0]) {
@@ -79,7 +56,9 @@ module assembly() {
   }
 
   // filament
-  % translate([filament_x,filament_y,0]) cylinder(r=3/2,h=60,$fn=8,center=true);
+  % translate([filament_x,filament_y,0]) {
+    hole(filament_diam,60);
+  }
 
   translate([idler_x,filament_y,0.1]) {
     //idler();
@@ -118,63 +97,18 @@ module extruder_body_base() {
     }
     // main block
     translate([main_body_x,0,main_body_z]) {
-      for(x=[-1,1]) {
-        for(z=[-1,1]) {
-          translate([x*(main_body_width/2-rounded_diam/2),mount_plate_thickness/2,z*(main_body_height/2-rounded_diam/2)]) {
-            rotate([90,0,0]) {
-              hole(rounded_diam,mount_plate_thickness);
-            }
-          }
+      translate([left*(main_body_width/2-rounded_diam/2),mount_plate_thickness/2,top*(main_body_height/2-rounded_diam/2)]) {
+        rotate([90,0,0]) {
+          hole(rounded_diam,mount_plate_thickness);
         }
       }
     }
 
     // idler retainer
-    translate([idler_x,mount_plate_thickness/2,0]) {
+    translate([0,mount_plate_thickness/2,0]) {
       rotate([90,0,0]) {
-        hole(idler_nut_diam+extrusion_width*4,mount_plate_thickness,6);
+        hole(bearing_outer,mount_plate_thickness,resolution);
       }
-    }
-  }
-
-  // hotend retainer block
-  total_retainer_height = main_body_hotend_side_height - ext_shaft_opening/2 + hotend_retainer_height;
-  total_retainer_z      = -1 * (ext_shaft_opening/2 + total_retainer_height/2);
-  filament_to_end       = total_depth - filament_y;
-
-  hull() {
-    translate([filament_x,filament_y,total_retainer_z+1]) {
-      hole(hotend_retainer_diam,total_retainer_height+2,resolution);
-
-      translate([0,filament_to_end/2,0]) {
-        cube([hotend_retainer_diam,filament_to_end,total_retainer_height+2],center=true);
-      }
-    }
-    translate([main_body_x,0,main_body_z]) {
-      for(x=[-1,1]) {
-        for(z=[-1]) {
-          translate([x*(main_body_width/2-rounded_diam/2),total_depth/2,z*(main_body_height/2-rounded_diam/2)]) {
-            rotate([90,0,0]) {
-              hole(rounded_diam,total_depth);
-            }
-          }
-        }
-      }
-    }
-    /*
-    translate([hotend_retainer_x,filament_y,0]) {
-      translate([0,0,-ext_shaft_opening/2-1]) {
-        cube([hotend_retainer_width,1,2],center=true);
-      }
-      translate([0,0,hotend_retainer_z]) {
-        cube([hotend_retainer_width,1,hotend_retainer_height],center=true);
-      }
-    }
-    */
-  }
-  translate([filament_x,filament_y,hotend_z-20]) {
-    rotate([0,0,0]) {
-      % hole(hotend_diam,40,resolution);
     }
   }
 
@@ -254,26 +188,80 @@ module extruder_body_holes() {
   bearing_bevel_height = bearing_opening - ext_shaft_opening;
 
   // shaft hole
-  translate([0,total_depth/2,0]) rotate([90,0,0]) {
-    hole(ext_shaft_opening,total_depth);
+  hull() {
+    translate([0,total_depth/2,0]) rotate([90,0,0]) {
+      hole(ext_shaft_opening,total_depth);
+    }
+
+    translate([idler_gap_x,total_depth/2,0]) {
+      cube([idler_gap_width,total_depth+1,ext_shaft_opening],center=true);
+    }
   }
 
-  hull() {
-    translate([0,mount_plate_thickness/2+total_depth/2,0]) {
-      rotate([90,0,0]) hole(ext_shaft_opening,total_depth);
-
-      translate([idler_x,0,0]) rotate([90,0,0]) {
-        hole(idler_nut_diam,total_depth,6);
+  // idler tensioner
+  translate([main_body_x-main_body_width/2,total_depth-4,bearing_outer/2+1.5+3/2]) {
+    # hull() {
+      rotate([0,90,0]) {
+        hole(3,main_body_width*2+1,8);
+      }
+      translate([0,0,1]) {
+        rotate([0,90,0]) {
+          hole(3,main_body_width*2+1,8);
+        }
+      }
+    }
+    rotate([0,90,0]) {
+      rotate([0,0,90]) {
+        hole(5.5,4,6);
       }
     }
   }
-  translate([motor_side/2,mount_plate_thickness+total_depth/2,0]) {
-    cube([motor_side,total_depth,ext_shaft_opening],center=true);
+
+  // idler gap
+  translate([idler_gap_x,total_depth/2,idler_gap_z]) {
+    cube([idler_gap_width,total_depth+1,idler_height],center=true);
+  }
+
+  // idler bearing/shaft
+  translate([idler_x,filament_y,0]) {
+    rotate([90,0,0]) {
+      // bearing
+      hole(idler_bearing_outer + 1, idler_bearing_thickness + 1, resolution);
+
+      // shaft
+      hole(idler_bearing_inner, total_depth*2, 8);
+    }
   }
 
   // filament path
   translate([filament_x,filament_y,0]) {
-    hole(filament_diam+1,50,8);
+    hole(filament_hole_diam,50,8);
+
+    // Bowden tubing
+    translate([0,0,-main_body_hotend_side_height]) {
+      hole(bowden_tubing_diam,(main_body_hotend_side_height-ext_shaft_opening/2-2)*2);
+    }
+    translate([0,0,main_body_idler_side_height]) {
+      hole(bowden_tubing_diam,(main_body_idler_side_height-ext_shaft_opening/2-2)*2);
+    }
+
+    // bowden clamp
+    translate([0,0,main_body_z+main_body_height/2]) {
+      translate([0,0,10]) {
+        // hole(8,20);
+      }
+
+      hull() {
+        translate([0,0,2]) {
+          hole(10,4);
+        }
+        translate([0,0,8]) {
+          translate([0,0,-1]) {
+            hole(8,2);
+          }
+        }
+      }
+    }
   }
 
   translate([0,gear_side_bearing_y,0]) {
@@ -372,6 +360,7 @@ module extruder_body_holes() {
   */
 
   // hotend mount
+  /*
   translate([filament_x,filament_y,hotend_z]) {
     translate([0,0,-hotend_retainer_height]) {
       hole(hotend_groove_diam,hotend_retainer_height*2,resolution);
@@ -389,6 +378,7 @@ module extruder_body_holes() {
       }
     }
   }
+  */
 }
 
 module bridges(){
@@ -398,8 +388,8 @@ module bridges(){
   // gear support bearing
   difference() {
     union() {
-      translate([main_body_x,gear_side_bearing_y+bearing_height/2+bridge_thickness/2,0]) {
-        cube([main_body_width,bridge_thickness,bearing_opening+0.1],center=true);
+      translate([0,gear_side_bearing_y+bearing_height/2+bridge_thickness/2,0]) {
+        cube([bearing_outer+0.5,bridge_thickness,bearing_opening+0.1],center=true);
       }
 
       translate([0,bridge_support_height/2,0]) {
@@ -423,11 +413,19 @@ module full_assembly() {
   assembly();
 
   translate([motor_x,-9,motor_z]) {
-    //rotate([-90,0,0]) small_gear();
+    rotate([-90,0,0]) {
+      //small_gear();
+    }
   }
 
   translate([0,-3,0]) {
-    //rotate([-90,0,0]) rotate([180,0,0]) rotate([0,0,0]) large_gear();
+    rotate([-90,0,0]) {
+      rotate([180,0,0]) {
+        rotate([0,0,0]) {
+          //large_gear();
+        }
+      }
+    }
   }
 }
 
