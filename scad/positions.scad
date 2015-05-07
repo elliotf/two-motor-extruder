@@ -48,7 +48,6 @@ hotend_retainer_z                = 0;
 // motor position
 motor_y = mount_plate_thickness;
 motor_z = -motor_hole_spacing/2;
-//motor_x = -sqrt(pow(gear_dist,2)-pow(motor_z,2));
 motor_x = -1*(main_body_motor_side_width+0.1+motor_side/2);
 
 gear_dist = sqrt(pow(abs(motor_x),2)+pow(abs(motor_z),2));

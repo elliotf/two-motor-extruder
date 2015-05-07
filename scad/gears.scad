@@ -31,7 +31,7 @@ large_tooth_num = 49;
 small_tooth_num = 9;
 /* use this ratio for NEMA17?
 */
-large_tooth_num = 38;
+large_tooth_num = 41;
 small_tooth_num = 13;
 // printed 51 and 9
 // 7 and 41

@@ -82,32 +82,23 @@ module gear_assembly() {
 
 module extruder_body_base() {
   // motor plate
-  rounded_diam = 8;
+  rounded_diam = motor_side-motor_hole_spacing;
   hull() {
     position_motor() {
       translate([0,0,mount_plate_thickness/2]) {
         for(x=[1]) {
           for(y=[-1,1]) {
             translate([x*(motor_hole_spacing/2),y*(motor_hole_spacing/2),0]) {
-              hole(rounded_diam*2,mount_plate_thickness);
+              hole(rounded_diam,mount_plate_thickness);
             }
           }
         }
       }
     }
     // main block
-    translate([main_body_x,0,main_body_z]) {
-      translate([left*(main_body_width/2-rounded_diam/2),mount_plate_thickness/2,top*(main_body_height/2-rounded_diam/2)]) {
-        rotate([90,0,0]) {
-          hole(rounded_diam,mount_plate_thickness);
-        }
-      }
-    }
-
-    // idler retainer
     translate([0,mount_plate_thickness/2,0]) {
       rotate([90,0,0]) {
-        hole(bearing_outer,mount_plate_thickness,resolution);
+        hole(rounded_diam,mount_plate_thickness);
       }
     }
   }
@@ -199,22 +190,40 @@ module extruder_body_holes() {
   }
 
   // idler tensioner
-  translate([main_body_x-main_body_width/2,total_depth-4,bearing_outer/2+1.5+3/2]) {
-    # hull() {
+  translate([main_body_x-main_body_width/2,filament_y-bowden_tubing_diam/2-2,bearing_outer/2+1.5+3/2]) {
+    hull() {
       rotate([0,90,0]) {
-        hole(3,main_body_width*2+1,8);
+        rotate([0,0,90]) {
+          hole(3,main_body_width*2+1,6);
+        }
       }
       translate([0,0,1]) {
         rotate([0,90,0]) {
-          hole(3,main_body_width*2+1,8);
+          rotate([0,0,90]) {
+            hole(3,main_body_width*2+1,6);
+          }
         }
       }
     }
-    rotate([0,90,0]) {
-      rotate([0,0,90]) {
-        hole(5.5,4,6);
+    hull() {
+      rotate([0,90,0]) {
+        rotate([0,0,90]) {
+          hole(5.5,4,6);
+        }
+      }
+      translate([0,0,1]) {
+        rotate([0,90,0]) {
+          rotate([0,0,90]) {
+            hole(5.5,4,6);
+          }
+        }
       }
     }
+  }
+
+  // make idler arm non-full depth
+  translate([main_body_x+main_body_width/2,total_depth,0]) {
+    cube([(main_body_open_side_width-idler_gap_x+idler_gap_width/2)*2,(total_depth-filament_y+idler_bearing_thickness/2+1/2)*2,main_body_height*2],center=true);
   }
 
   // idler gap
@@ -246,16 +255,16 @@ module extruder_body_holes() {
     }
 
     // bowden clamp
-    translate([0,0,main_body_z+main_body_height/2]) {
+    # translate([0,0,main_body_z+main_body_height/2]) {
       translate([0,0,10]) {
-        // hole(8,20);
+        hole(8,20);
       }
 
       hull() {
         translate([0,0,2]) {
           hole(10,4);
         }
-        translate([0,0,8]) {
+        translate([0,0,7]) {
           translate([0,0,-1]) {
             hole(8,2);
           }
