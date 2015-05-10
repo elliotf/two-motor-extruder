@@ -7,10 +7,10 @@ filament_x = hobbed_diam/2 + filament_diam/2 - .6;
 gear_side_bearing_y = bearing_height/2-m3_socket_head_height+1;
 
 // MR105ZZ
-idler_bearing_outer     = 10;
-idler_bearing_inner     = 5;
-idler_bearing_thickness = 4;
-idler_nut_diam          = 8;
+//idler_bearing_outer     = 10;
+//idler_bearing_inner     = 5;
+//idler_bearing_thickness = 4;
+//idler_nut_diam          = 8;
 
 // 625ZZ
 idler_bearing_height = 5;
@@ -62,10 +62,11 @@ idler_thumb_lever_length = 6;
 bowden_retainer_clip_outer = 12;
 
 filament_y   = mount_plate_thickness + filament_diam;
-total_depth  = filament_y + idler_bearing_height * 2;
+total_depth  = filament_y + idler_bearing_height * 1.75;
 total_height = motor_side + bottom_thickness;
 
 idler_gap_width = 1;
-idler_height    = main_body_height - 1;
-idler_gap_x     = idler_x - idler_shaft_diam/2 - 1 - idler_gap_width/2;
-idler_gap_z     = main_body_z + main_body_height/2 - idler_height/2 + 1;
+idler_height       = main_body_height - 2;
+idler_hinge_height = 2;
+idler_gap_x        = idler_x - idler_shaft_diam/2 - 1 - idler_gap_width/2;
+idler_gap_z        = main_body_z + (main_body_height/2 - idler_height/2);

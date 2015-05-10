@@ -27,6 +27,7 @@ m3_socket_head_height = 3;
 m5_diam = 5;
 m5_nut_diam = 8;
 m5_nut_thickness = 5;
+m5_bolt_head_thickness = 4;
 
 // Motors
 nema17_side = 43;
@@ -101,7 +102,7 @@ bearing_outer  = 19;
 bearing_inner  = 6;
 
 // 625
-bearing_height = 5;
+bearing_height = 5.3;
 bearing_outer  = 16;
 bearing_inner  = 5;
 
@@ -128,6 +129,8 @@ idler_bearing_inner  = bearing_inner;
 filament_diam = 3;
 filament_hole_diam = filament_diam + 1;
 bowden_tubing_diam = 6.5;
+bowden_retainer_inner = 11; // FIXME:  not correct -- it needs to include diameter of retainer with PTFE in it
+bowden_retainer_body_diam = bowden_retainer_inner + 4;
 
 mount_plate_thickness = 10;
 bottom_thickness = m3_socket_head_diam + min_material_thickness;
