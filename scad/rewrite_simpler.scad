@@ -370,7 +370,7 @@ module extruder_body_holes() {
         }
       }
 
-      translate([idler_gap_x - main_body_width/2,0,0]) {
+      translate([idler_gap_x + idler_gap_width/2 - main_body_width/2,0,0]) {
         cube([main_body_width,total_depth,main_body_height],center=true);
       }
     }
