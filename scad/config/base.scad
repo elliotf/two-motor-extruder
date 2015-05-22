@@ -129,7 +129,7 @@ idler_bearing_inner  = bearing_inner;
 filament_diam = 3;
 filament_hole_diam = filament_diam + 1;
 bowden_tubing_diam = 6.5;
-bowden_retainer_inner = 11; // FIXME:  not correct -- it needs to include diameter of retainer with PTFE in it
+bowden_retainer_inner = 11;
 bowden_retainer_body_diam = bowden_retainer_inner + 4;
 
 mount_plate_thickness = 10;
