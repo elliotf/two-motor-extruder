@@ -20,28 +20,56 @@ resolution                   = 32;
 motor_x = motor_shaft_len/2 + motor_shoulder_height + 1;
 motor_y = filament_diam/2 + hobbed_pulley_effective_diam/2;
 
-rounded_diam          = motor_side - motor_hole_spacing;
-motor_mount_thickness = 4;
+rounded_diam           = motor_side - motor_hole_spacing;
+motor_screw_length     = 14;
+motor_screw_hole_depth = 3;
+motor_mount_thickness  = motor_screw_length - motor_screw_hole_depth;
 
-drive_motor_x = motor_x * right;
+hinge_len            = motor_x;
+hinge_gap            = 0.05;
+hinge_diam           = 5;
+hinge_nut_diam       = 8;
+hinge_nut_outer_diam = 9;
+hinge_opening_diam   = hinge_diam + hinge_gap*2;
+hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
+hinge_pos_y          = front*(filament_bowden_diam/2+hinge_body_diam/2);
+hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam/2;
+hinge_offset         = filament_bowden_diam + 1;
+
+drive_motor_x = (motor_x-hinge_offset/2) * right;
 drive_motor_y = motor_y * rear;
 drive_motor_z = 0;
-idler_motor_x = motor_x * left;
+idler_motor_x = (motor_x+hinge_offset) * left;
 idler_motor_y = motor_y * front;
 idler_motor_z = 0;
 
-hinge_diam      = 12;
-hinge_len       = drive_motor_x - idler_motor_x - 0.5 - motor_mount_thickness*2;
-hinge_gap       = 0.5;
-hinge_opening_diam = hinge_diam + hinge_gap*2;
-hinge_body_diam = hinge_opening_diam + extrusion_width * 8;
-hinge_pos_y     = front*(hinge_body_diam/2);
-hinge_pos_z     = -motor_side/2-hinge_diam/2;
+drive_side_height = abs(drive_motor_x) + hinge_offset;
+idler_side_height = abs( abs(drive_motor_x - drive_side_height) - abs(idler_motor_x) );
+
+show_drive_side = 1;
+show_idler_side = 1;
 
 module position_drive_motor() {
-  translate([motor_x,motor_y,0]) {
+  translate([drive_motor_x,drive_motor_y,0]) {
     rotate([0,-90,0]) {
       children();
+    }
+  }
+}
+
+module cut_rounded_corner(diam,height=50) {
+  translate([diam/2,diam/2,0]) {
+    difference() {
+      translate([-1,-1,0]) {
+        cube([diam+1,diam+1,height],center=true);
+      }
+      hole(diam,height+1, resolution);
+      translate([0,diam/2,0]) {
+        cube([diam,diam,height+1],center=true);
+      }
+      translate([diam/2,0,0]) {
+        cube([diam,diam,height+1],center=true);
+      }
     }
   }
 }
@@ -54,50 +82,45 @@ module position_idler_motor() {
   }
 }
 
+module base_body(main_height, hinge_coords) {
+  hole_dist = motor_hole_spacing/2;
+  hull() {
+    for(d=[hole_dist]) {
+      for(coords=[[0,d,-d],[0,-d,-d],[0,d,d],[0,-d,d]]) {
+        translate(coords) {
+          rotate([0,90,0]) {
+            hole(rounded_diam,main_height,resolution);
+          }
+        }
+      }
+    }
+    translate(hinge_coords) {
+      rotate([0,90,0]) {
+        hole(hinge_body_diam,main_height,resolution);
+      }
+    }
+  }
+}
+
+module base_holes() {
+}
+
 module drive_side() {
   drive_hinge_pos_y = -drive_motor_y + hinge_pos_y;
   drive_hinge_pos_z = drive_motor_z + hinge_pos_z;
 
+  main_height = drive_side_height;
+  hinge_coords = [0,drive_hinge_pos_y,drive_hinge_pos_z];
+
   module body() {
+    // same as above, but for main body
     hull() {
-      translate([-motor_mount_thickness/2,0,0]) {
-        rotate([0,90,0]) {
-          hole(motor_shoulder_diam+1+extrusion_width*8,motor_mount_thickness,resolution);
-        }
-        for(d=[motor_hole_spacing/2]) {
-          for(coords=[[0,d,d],[0,-d,-d],[0,d,-d]]) {
-            translate(coords) {
-              rotate([0,90,0]) {
-                hole(rounded_diam,motor_mount_thickness,resolution);
-              }
-            }
-          }
-        }
+      translate([-main_height/2,0,0]) {
+        base_body(main_height, hinge_coords);
       }
-
-      translate([-motor_mount_thickness/2,drive_hinge_pos_y,drive_hinge_pos_z]) {
-        rotate([0,90,0]) {
-          hole(hinge_body_diam,motor_mount_thickness,resolution);
-        }
-      }
-    }
-
-    hull() {
-      translate([-motor_mount_thickness/2,0,0]) {
-        for(d=[motor_hole_spacing/2]) {
-          for(coords=[[0,d,-d],[0,-d,-d]]) {
-            translate(coords) {
-              rotate([0,90,0]) {
-                hole(rounded_diam,motor_mount_thickness,resolution);
-              }
-            }
-          }
-        }
-      }
-      translate([-motor_mount_thickness-hinge_len/2,drive_hinge_pos_y,drive_hinge_pos_z]) {
-        rotate([0,90,0]) {
-          hole(hinge_body_diam,hinge_len,resolution);
-        }
+      // filament body
+      translate([-drive_motor_x,-drive_motor_y,hinge_pos_z]) {
+        hole(filament_bowden_diam+2,hinge_body_diam,resolution);
       }
     }
   }
@@ -106,38 +129,169 @@ module drive_side() {
     // motor shoulder
     hull() {
       rotate([0,90,0]) {
-        hole(motor_shoulder_diam+1,motor_shoulder_height*2+1,resolution);
-        hole(hobbed_diam+1,motor_x*2,resolution);
+        hole(motor_shoulder_diam+1,motor_shoulder_height*2,resolution);
+        hole(hobbed_diam+1,(abs(drive_motor_x)-filament_diam/2)*2,resolution);
       }
     }
 
-    // hinge void
-    translate([-motor_mount_thickness-hinge_len,drive_hinge_pos_y,drive_hinge_pos_z]) {
-      rotate([0,90,0]) {
-        hole(hinge_opening_diam,hinge_len*2,resolution);
+    translate([-main_height-1,-drive_motor_y+idler_motor_y,0]) {
+      hull() {
+        rotate([0,90,0]) {
+          hole(motor_shoulder_diam+1,2,resolution);
+          hole(hobbed_diam+1,main_height-hinge_offset,resolution);
+        }
+      }
+    }
+
+    // hobbed pulley area
+    translate([-main_height/2,0,0]) {
+      hull() {
+        for(coords=[[0,0,0],[0,-motor_side/2,0]]) {
+          translate(coords) {
+            rotate([0,90,0]) {
+              hole(hobbed_pulley_diam+1,main_height+1,resolution);
+            }
+          }
+        }
       }
 
-      for(r=[0,10]) {
-        rotate([r,0,0]) {
-          translate([0,hinge_opening_diam/4,motor_side/2]) {
-            cube([hinge_len*2,hinge_opening_diam/2,motor_side],center=true);
+      for(side=[top,bottom]) {
+        translate([0,-motor_side/2,side*(hobbed_pulley_diam+1)/2]) {
+          rotate([0,90*-side,0]) {
+            cut_rounded_corner(rounded_diam);
           }
         }
       }
     }
 
+    // hinge void
+    translate([0,drive_hinge_pos_y,drive_hinge_pos_z]) {
+      translate([-hinge_len-extrusion_height-2,0,0]) {
+        rotate([0,90,0]) {
+          hole(hinge_opening_diam,hinge_len*2,resolution);
+        }
+      }
+      rotate([0,90,0]) {
+        hole(hinge_nut_diam,4,6);
+      }
+    }
+
     // filament_path
     translate([-drive_motor_x,-drive_motor_y,0]) {
-      hole(filament_opening_diam,motor_side*3,8);
+      //hole(filament_opening_diam,motor_side*3,8);
+      hole(filament_bowden_diam,motor_side*3,16);
     }
 
     // motor screw holes
-    translate([-drive_motor_x,0,0]) {
-      for(y=[front,rear]) {
-        for(z=[top,bottom]) {
-          translate([0,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
+    for(y=[front,rear]) {
+      for(z=[top,bottom]) {
+        translate([-motor_x,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
+          rotate([0,90,0]) {
+            hole(m3_diam,motor_len*2,resolution);
+            hole(m3_nut_diam,(motor_x-motor_mount_thickness)*2,resolution);
+
+            hull() {
+              hole(m3_diam,4,resolution);
+              hole(m3_diam+1,1,resolution);
+            }
+          }
+        }
+        translate([0,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
+          rotate([0,90,0]) {
+            hull() {
+              hole(m3_diam,1+extrusion_width*2,resolution);
+              hole(m3_diam+extrusion_width*2,1,resolution);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  difference() {
+    body();
+    holes();
+  }
+}
+
+module idler_side() {
+  idler_hinge_pos_y = -idler_motor_y + hinge_pos_y;
+  idler_hinge_pos_z = idler_motor_z + hinge_pos_z;
+
+  main_height = idler_side_height;
+  hinge_coords = [0,idler_hinge_pos_y,idler_hinge_pos_z];
+
+  module body() {
+    // same as above, but for main body
+    hull() {
+      translate([main_height/2,0,0]) {
+        base_body(main_height, hinge_coords);
+      }
+    }
+  }
+
+  module holes() {
+    // motor shoulder
+    hull() {
+      rotate([0,90,0]) {
+        hole(motor_shoulder_diam+1,motor_shoulder_height*2,resolution);
+        hole(hobbed_diam+1,motor_shoulder_diam,resolution);
+      }
+    }
+
+    translate([main_height+1,-idler_motor_y+idler_motor_y,0]) {
+      hull() {
+        rotate([0,90,0]) {
+          hole(motor_shoulder_diam+1,2,resolution);
+          # hole(hobbed_diam+1,main_height-hinge_offset,resolution);
+        }
+      }
+    }
+
+    // hobbed pulley area
+    translate([main_height/2,0,0]) {
+      hull() {
+        for(coords=[[0,0,0],[0,motor_side/2,0]]) {
+          translate(coords) {
             rotate([0,90,0]) {
-              # hole(m3_diam,motor_len*2,resolution);
+              hole(hobbed_pulley_diam+1,main_height+1,resolution);
+            }
+          }
+        }
+      }
+    }
+
+    // hinge void
+    translate([0,idler_hinge_pos_y,idler_hinge_pos_z]) {
+      translate([hinge_len+extrusion_height+2,0,0]) {
+        rotate([0,90,0]) {
+          hole(hinge_opening_diam,hinge_len*2,resolution);
+        }
+      }
+      rotate([0,90,0]) {
+        hole(hinge_nut_diam,4,6);
+      }
+    }
+
+    // motor screw holes
+    for(y=[front,rear]) {
+      for(z=[top,bottom]) {
+        translate([motor_x,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
+          rotate([0,90,0]) {
+            hole(m3_diam,motor_len*2,resolution);
+            hole(m3_nut_diam,(motor_x-motor_mount_thickness)*2,resolution);
+
+            hull() {
+              hole(m3_diam,4,resolution);
+              hole(m3_diam+1,1,resolution);
+            }
+          }
+        }
+        translate([0,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
+          rotate([0,90,0]) {
+            hull() {
+              hole(m3_diam,1+extrusion_width*2,resolution);
+              hole(m3_diam+extrusion_width*2,1,resolution);
             }
           }
         }
@@ -176,22 +330,34 @@ module hobbed_pulley() {
 // filament path
 % hole(filament_diam, motor_side*2, resolution);
 
-translate([drive_motor_x,drive_motor_y,drive_motor_z]) {
-  drive_side();
-}
+if (show_drive_side) {
+  translate([drive_motor_x+0.05,drive_motor_y,drive_motor_z]) {
+    drive_side();
+  }
 
-position_drive_motor() {
-  % motor();
+  translate([0.05,0,0]) {
+    position_drive_motor() {
+      % motor();
 
-  translate([0,0,motor_x]) {
-    % hobbed_pulley();
+      translate([0,0,drive_motor_x]) {
+        % hobbed_pulley();
+      }
+    }
   }
 }
 
-position_idler_motor() {
-  % motor();
 
-  translate([0,0,motor_x]) {
-    % hobbed_pulley();
+if (show_idler_side) {
+  translate([idler_motor_x-0.05,idler_motor_y,idler_motor_z]) {
+    idler_side();
+  }
+  translate([-0.05,0,0]) {
+    position_idler_motor() {
+      % motor();
+
+      translate([0,0,-idler_motor_x]) {
+        % hobbed_pulley();
+      }
+    }
   }
 }
