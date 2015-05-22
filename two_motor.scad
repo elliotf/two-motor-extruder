@@ -28,6 +28,9 @@ filament_opening_diam     = bowden_tubing_diam - 2;
 
 resolution                   = 32;
 
+extrusion_height = .3;
+extrusion_width  = .6;
+
 // positions
 
 motor_x = motor_shaft_len/2 + motor_shoulder_height + 1;
@@ -47,7 +50,7 @@ hinge_opening_diam   = hinge_diam + hinge_gap*2;
 hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
 hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_diam/2);
 hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam/2;
-hinge_offset         = bowden_tubing_diam + 1;
+hinge_offset         = bowden_tubing_diam + extrusion_width*2;
 
 drive_motor_x = (motor_x-hinge_offset/2) * right;
 drive_motor_y = motor_y * rear;
@@ -229,7 +232,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
 module base_bridges(main_height, hinge_pos_y, opening_side) {
   translate([opening_side*(motor_shoulder_height+1+extrusion_height/2),0,0]) {
     rotate([0,90,0]) {
-      hole(motor_shoulder_diam+1,extrusion_height,resolution);
+      cube([motor_shoulder_diam+1,motor_shoulder_diam+1,extrusion_height],center=true);
     }
   }
   translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
@@ -257,6 +260,7 @@ module drive_side() {
 
   module holes() {
     base_holes(main_height, drive_hinge_pos_y, front);
+    bowden_retainer_lip = extrusion_width*2;
 
     // filament path
     translate([-drive_motor_x,-drive_motor_y,0]) {
@@ -264,7 +268,7 @@ module drive_side() {
 
       for(side=[top,bottom]) {
         // spool/hotend-side bowden tubing path
-        translate([0,0,side*(1+hobbed_area_opening/2+motor_side/2)]) {
+        translate([0,0,side*(bowden_retainer_lip+hobbed_area_opening/2+motor_side/2)]) {
           hole(bowden_tubing_diam,motor_side,16);
         }
       }
