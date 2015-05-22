@@ -1,12 +1,14 @@
 include <scad/config.scad>;
 use <scad/rewrite_simpler.scad>;
 
-// ideas/TODO
 /*
 
+// ideas
 printed circular bevel/dovetail so that the idler is prevented from falling out?
   idler would have a circular dovetail that sits in a negative space on the drive side (or vice versa)
   circular path with its origin at the hinge point
+
+// TODO
 
 */
 
@@ -16,6 +18,7 @@ hobbed_pulley_effective_diam = 6.9;
 hobbed_pulley_len            = 11;
 hobbed_pulley_hob_diam       = 5;
 hobbed_pulley_hob_to_base    = 8;
+hobbed_area_opening          = hobbed_pulley_diam + 1;
 
 bowden_tubing_diam        = 6.5;
 bowden_retainer_inner     = 11;
@@ -31,7 +34,7 @@ motor_x = motor_shaft_len/2 + motor_shoulder_height + 1;
 motor_y = filament_diam/2 + hobbed_pulley_effective_diam/2;
 
 rounded_diam           = motor_side - motor_hole_spacing;
-motor_screw_length     = 14;
+motor_screw_length     = 10;
 motor_screw_hole_depth = 3;
 motor_mount_thickness  = motor_screw_length - motor_screw_hole_depth;
 
@@ -42,7 +45,7 @@ hinge_nut_diam       = 8;
 hinge_nut_outer_diam = 9;
 hinge_opening_diam   = hinge_diam + hinge_gap*2;
 hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
-hinge_pos_y          = front*(bowden_tubing_diam/2+hinge_body_diam/2);
+hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_diam/2);
 hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam/2;
 hinge_offset         = bowden_tubing_diam + 1;
 
@@ -57,7 +60,8 @@ drive_side_height = abs(drive_motor_x) + hinge_offset;
 idler_side_height = abs( abs(drive_motor_x - drive_side_height) - abs(idler_motor_x) );
 
 show_drive_side = 1;
-show_idler_side = 1;
+show_idler_side = 0;
+show_bridges    = 1;
 
 module position_drive_motor() {
   translate([drive_motor_x,drive_motor_y,0]) {
@@ -114,12 +118,28 @@ module base_body(main_height, hinge_pos_y, opening_side) {
   }
 }
 
+module bowden_retainer_body() {
+  hull() {
+    translate([0,0,0]) {
+      translate([0,0,0]) {
+        hole(bowden_retainer_body_diam,8,resolution);
+      }
+    }
+  }
+}
+
 module base_holes(main_height, hinge_pos_y, opening_side) {
   // motor shoulder
+  rotate([0,90,0]) {
+    hole(motor_shoulder_diam,(motor_shoulder_height+1)*2,resolution*2);
+    //hole(hobbed_area_opening,(abs(drive_motor_x)-filament_diam/2)*2,resolution*2);
+  }
+
   hull() {
+    // clearance for drive-side grub screw
     rotate([0,90,0]) {
-      hole(motor_shoulder_diam,motor_shoulder_height*2,resolution*2);
-      hole(hobbed_diam+1,(abs(drive_motor_x)-filament_diam/2)*2,resolution*2);
+      hole(motor_shoulder_diam-4,(motor_shoulder_height+1)*2,resolution*2);
+      hole(hobbed_area_opening,(abs(drive_motor_x)-filament_diam/2)*2,resolution*2);
     }
   }
 
@@ -133,12 +153,12 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
     }
   }
 
-  // clearance for grub screw
+  // clearance for idler-side grub screw
   translate([opening_side*(main_height+1),0,0]) {
     hull() {
       rotate([0,90,0]) {
         hole(motor_shoulder_diam,2,resolution);
-        hole(hobbed_diam+1,main_height-hinge_offset,resolution);
+        hole(hobbed_area_opening,main_height-hinge_offset,resolution);
       }
     }
   }
@@ -149,7 +169,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
       for(coords=[[0,0,0],[0,opening_side*motor_side/2,0]]) {
         translate(coords) {
           rotate([0,90,0]) {
-            hole(hobbed_pulley_diam+1,main_height+1,resolution);
+            hole(hobbed_area_opening,main_height+1,resolution);
           }
         }
       }
@@ -157,7 +177,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
 
     // round the pulley area opening
     for(side=[top,bottom]) {
-      translate([0,opening_side*motor_side/2,side*(hobbed_pulley_diam+1)/2]) {
+      translate([0,opening_side*motor_side/2,side*(hobbed_area_opening)/2]) {
         rotate([0,0,90+90*opening_side]) {
           rotate([0,90*-side,0]) {
             cut_rounded_corner(rounded_diam);
@@ -206,6 +226,19 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
   }
 }
 
+module base_bridges(main_height, hinge_pos_y, opening_side) {
+  translate([opening_side*(motor_shoulder_height+1+extrusion_height/2),0,0]) {
+    rotate([0,90,0]) {
+      hole(motor_shoulder_diam+1,extrusion_height,resolution);
+    }
+  }
+  translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
+    rotate([0,90,0]) {
+      hole(motor_shoulder_diam-6,motor_shoulder_height+1,resolution);
+    }
+  }
+}
+
 module drive_side() {
   drive_hinge_pos_y = -drive_motor_y + hinge_pos_y;
   main_height       = drive_side_height;
@@ -228,16 +261,26 @@ module drive_side() {
     // filament path
     translate([-drive_motor_x,-drive_motor_y,0]) {
       hole(filament_opening_diam,motor_side*3,16);
+
+      for(side=[top,bottom]) {
+        // spool/hotend-side bowden tubing path
+        translate([0,0,side*(1+hobbed_area_opening/2+motor_side/2)]) {
+          hole(bowden_tubing_diam,motor_side,16);
+        }
+      }
     }
+  }
 
-    // hotend-side bowden tubing path
-
-    // spool-side bowden tubing path
+  module bridges() {
+    base_bridges(main_height, drive_hinge_pos_y, front);
   }
 
   difference() {
     body();
     holes();
+  }
+  if (show_bridges) {
+    bridges();
   }
 }
 
@@ -255,14 +298,22 @@ module idler_side() {
     base_holes(main_height, idler_hinge_pos_y, rear);
   }
 
+  module bridges() {
+    base_bridges(main_height, drive_hinge_pos_y, rear);
+  }
+
   difference() {
     body();
     holes();
+  }
+  if (show_bridges) {
+    bridges();
   }
 }
 
 module hobbed_pulley() {
   hob_rounded_radius = hobbed_pulley_effective_diam/2 + hobbed_pulley_hob_diam/2;
+
   difference() {
     translate([0,0,hobbed_pulley_len/2 - hobbed_pulley_hob_to_base]) {
       hole(hobbed_pulley_diam,hobbed_pulley_len,resolution);
@@ -287,7 +338,7 @@ module assembly() {
 
     translate([0.05,0,0]) {
       position_drive_motor() {
-        % motor();
+        //% motor();
 
         translate([0,0,drive_motor_x]) {
           % hobbed_pulley();
@@ -302,7 +353,7 @@ module assembly() {
     }
     translate([-0.05,0,0]) {
       position_idler_motor() {
-        % motor();
+        //% motor();
 
         translate([0,0,-idler_motor_x]) {
           % hobbed_pulley();
@@ -326,5 +377,5 @@ module plate() {
   }
 }
 
-assembly();
-//plate();
+//assembly();
+plate();
