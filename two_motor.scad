@@ -50,7 +50,7 @@ hinge_opening_diam   = hinge_diam + hinge_gap*2;
 hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
 hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_diam/2);
 hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam/2;
-hinge_offset         = bowden_tubing_diam + extrusion_width*2;
+hinge_offset         = bowden_retainer_body_diam/2;
 
 drive_motor_x = (motor_x-hinge_offset/2) * right;
 drive_motor_y = motor_y * rear;
@@ -62,8 +62,17 @@ idler_motor_z = 0;
 drive_side_height = abs(drive_motor_x) + hinge_offset;
 idler_side_height = abs( abs(drive_motor_x - drive_side_height) - abs(idler_motor_x) );
 
+idler_nut_pos_x                 = left*(bowden_tubing_diam/2);
+idler_nut_pos_y                 = motor_side*.45;
+idler_nut_pos_z                 = motor_side/2 + m3_nut_diam/2;
+idler_nut_angle_from_drive_side = -15;
+idler_screw_len                 = motor_side;
+
+idler_anchor_pos_x = 0;
+idler_anchor_pos_x = 0;
+
 show_drive_side = 1;
-show_idler_side = 0;
+show_idler_side = 1;
 show_bridges    = 1;
 
 module position_drive_motor() {
@@ -121,16 +130,6 @@ module base_body(main_height, hinge_pos_y, opening_side) {
   }
 }
 
-module bowden_retainer_body() {
-  hull() {
-    translate([0,0,0]) {
-      translate([0,0,0]) {
-        hole(bowden_retainer_body_diam,8,resolution);
-      }
-    }
-  }
-}
-
 module base_holes(main_height, hinge_pos_y, opening_side) {
   // motor shoulder
   rotate([0,90,0]) {
@@ -157,6 +156,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
   }
 
   // clearance for idler-side grub screw
+  /*
   translate([opening_side*(main_height+1),0,0]) {
     hull() {
       rotate([0,90,0]) {
@@ -165,6 +165,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
       }
     }
   }
+  */
 
   // hobbed pulley area
   translate([opening_side*main_height/2,0,0]) {
@@ -245,6 +246,8 @@ module base_bridges(main_height, hinge_pos_y, opening_side) {
 module drive_side() {
   drive_hinge_pos_y = -drive_motor_y + hinge_pos_y;
   main_height       = drive_side_height;
+  filament_pos_x    = -drive_motor_x;
+  filament_pos_y    = -drive_motor_y;
 
   module body() {
     hull() {
@@ -252,8 +255,27 @@ module drive_side() {
         base_body(main_height, drive_hinge_pos_y);
       }
       // filament body at bottom
-      translate([-drive_motor_x,-drive_motor_y,hinge_pos_z]) {
-        hole(bowden_tubing_diam+2,hinge_body_diam,resolution);
+      translate([filament_pos_x,filament_pos_y,0]) {
+        translate([0,0,hinge_pos_z]) {
+          hole(bowden_tubing_diam+2,hinge_body_diam,resolution);
+        }
+      }
+    }
+  }
+
+  module bowden_retainer_void() {
+    translate([0,0,10]) {
+      hole(8,20);
+    }
+
+    hull() {
+      translate([0,0,2]) {
+        hole(bowden_retainer_inner,4);
+      }
+      translate([0,0,7]) {
+        translate([0,0,-1]) {
+          hole(8,2);
+        }
       }
     }
   }
@@ -263,13 +285,31 @@ module drive_side() {
     bowden_retainer_lip = extrusion_width*2;
 
     // filament path
-    translate([-drive_motor_x,-drive_motor_y,0]) {
+    translate([filament_pos_x,filament_pos_y,0]) {
       hole(filament_opening_diam,motor_side*3,16);
+
+      // bowden retainer holes
+      translate([0,0,motor_side/4]) {
+        bowden_retainer_void();
+      }
 
       for(side=[top,bottom]) {
         // spool/hotend-side bowden tubing path
         translate([0,0,side*(bowden_retainer_lip+hobbed_area_opening/2+motor_side/2)]) {
           hole(bowden_tubing_diam,motor_side,16);
+        }
+      }
+    }
+
+    # translate([-drive_motor_x,-drive_motor_y,0]) {
+      translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
+        rotate([0,0,idler_nut_angle_from_drive_side]) {
+          rotate([90,0,0]) {
+            translate([0,0,motor_side/2]) {
+              hole(m3_diam, motor_side, resolution);
+            }
+            hole(m3_nut_diam, 3, 6);
+          }
         }
       }
     }
@@ -303,7 +343,7 @@ module idler_side() {
   }
 
   module bridges() {
-    base_bridges(main_height, drive_hinge_pos_y, rear);
+    base_bridges(main_height, idler_hinge_pos_y, rear);
   }
 
   difference() {
@@ -334,6 +374,16 @@ module hobbed_pulley() {
 module assembly() {
   // filament path
   % hole(filament_diam, motor_side*2, resolution);
+
+  // idler screw
+  /*
+  % translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
+    rotate([90,0,0]) {
+      hole(m3_diam, motor_side, resolution);
+      hole(m3_nut_diam, 3, 6);
+    }
+  }
+  */
 
   if (show_drive_side) {
     translate([drive_motor_x+0.05,drive_motor_y,drive_motor_z]) {

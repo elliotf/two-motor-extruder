@@ -19,7 +19,7 @@ y = 1;
 z = 2;
 
 // Screws, nuts
-m3_diam = 3;
+m3_diam = 3.1;
 m3_nut_diam  = 5.5;
 m3_nut_thickness  = 3;
 m3_socket_head_diam = 6;
