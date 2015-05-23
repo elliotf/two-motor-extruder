@@ -9,6 +9,10 @@ printed circular bevel/dovetail so that the idler is prevented from falling out?
   circular path with its origin at the hinge point
 
 // TODO
+bowden retainer void is too far in (hopefully fixed)
+hobbed pulleys collide with extruder body when opening/closing (hopefully fixed)
+motor hole mounts print horribly
+hinge hole is too tight on an m5 bolt (gave it a bit more space, more resolution)
 
 */
 
@@ -36,19 +40,21 @@ extrusion_width  = .6;
 motor_x = motor_shaft_len/2 + motor_shoulder_height + 1;
 motor_y = filament_diam/2 + hobbed_pulley_effective_diam/2;
 
+motor_screw_head_opening = m3_nut_diam + 1;
 rounded_diam           = motor_side - motor_hole_spacing;
+rounded_diam           = motor_screw_head_opening + extrusion_width*6;
 motor_screw_length     = 10;
 motor_screw_hole_depth = 3;
 motor_mount_thickness  = motor_screw_length - motor_screw_hole_depth;
 
 hinge_len            = motor_x;
-hinge_gap            = 0.05;
+hinge_gap            = 0.1;
 hinge_diam           = 5;
 hinge_nut_diam       = 8;
 hinge_nut_outer_diam = 9;
 hinge_opening_diam   = hinge_diam + hinge_gap*2;
 hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
-hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_diam/2);
+hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_opening_diam/2);
 hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam/2;
 hinge_offset         = bowden_retainer_body_diam/2;
 
@@ -180,7 +186,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
     }
 
     // round the pulley area opening
-    for(side=[top,bottom]) {
+    for(side=[top]) {
       translate([0,opening_side*motor_side/2,side*(hobbed_area_opening)/2]) {
         rotate([0,0,90+90*opening_side]) {
           rotate([0,90*-side,0]) {
@@ -196,16 +202,16 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
     for(z=[top,bottom]) {
       translate([main_height*opening_side,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
         rotate([0,90,0]) {
-          hole(m3_diam,motor_len*2,resolution);
-          hole(m3_nut_diam+1,(main_height-motor_mount_thickness)*2,resolution);
+          hole(m3_diam,motor_len*2,16);
+          hole(m3_nut_diam+1,(main_height-motor_mount_thickness)*2,16);
         }
       }
       translate([0,motor_hole_spacing/2*y,motor_hole_spacing/2*z]) {
         translate([-.5*opening_side,0,0]) {
           rotate([0,90,0]) {
             hull() {
-              hole(m3_diam+extrusion_width*2,1,resolution);
-              hole(m3_diam,1+extrusion_width*3,resolution);
+              hole(m3_diam+extrusion_width*2,1,16);
+              hole(m3_diam,1+extrusion_width*3,16);
             }
           }
         }
@@ -216,14 +222,14 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
   // hinge void
   translate([0,hinge_pos_y,hinge_pos_z]) {
     rotate([0,90,0]) {
-      hole(hinge_opening_diam,main_height*2+1,resolution);
+      hole(hinge_opening_diam,main_height*2+1,16);
     }
 
     translate([-.5*opening_side,0,0]) {
       rotate([0,90,0]) {
         hull() {
-          hole(hinge_opening_diam+extrusion_width*2,1,resolution);
-          hole(hinge_opening_diam,1+extrusion_width*3,resolution);
+          hole(hinge_opening_diam+extrusion_width*2,1,16);
+          hole(hinge_opening_diam,1+extrusion_width*3,16);
         }
       }
     }
@@ -250,14 +256,43 @@ module drive_side() {
   filament_pos_y    = -drive_motor_y;
 
   module body() {
-    hull() {
-      translate([-main_height/2,0,0]) {
-        base_body(main_height, drive_hinge_pos_y);
-      }
-      // filament body at bottom
-      translate([filament_pos_x,filament_pos_y,0]) {
-        translate([0,0,hinge_pos_z]) {
-          hole(bowden_tubing_diam+2,hinge_body_diam,resolution);
+    translate([-main_height/2,0,0]) {
+      intersection() {
+        union() {
+          hull() {
+            base_body(main_height, drive_hinge_pos_y, front);
+            // filament body at bottom
+            translate([filament_pos_x+main_height/2,filament_pos_y,0]) {
+              translate([0,0,hinge_pos_z]) {
+                hole(bowden_tubing_diam+2,hinge_body_diam,resolution);
+              }
+            }
+          }
+        }
+        union() {
+          translate([0,0,motor_side/2]) {
+            cube([main_height*2,motor_side+1,motor_side],center=true);
+          }
+          hull() {
+            translate([0,motor_side/2+hobbed_area_opening/2,-motor_side/2]) {
+              cube([main_height*2,motor_side,motor_side],center=true);
+            }
+            translate([0,-motor_shoulder_diam/2,-hobbed_area_opening/2-rounded_diam/2]) {
+              rotate([0,90,0]) {
+                hole(rounded_diam,main_height+1,resolution);
+              }
+            }
+            translate([0,drive_hinge_pos_y,hinge_pos_z]) {
+              rotate([0,90,0]) {
+                hole(hinge_body_diam,main_height+1,resolution);
+              }
+            }
+            translate([0,-motor_hole_spacing/2,-motor_hole_spacing/2]) {
+              rotate([0,90,0]) {
+                hole(rounded_diam,main_height+1,resolution);
+              }
+            }
+          }
         }
       }
     }
@@ -272,10 +307,8 @@ module drive_side() {
       translate([0,0,2]) {
         hole(bowden_retainer_inner,4);
       }
-      translate([0,0,7]) {
-        translate([0,0,-1]) {
-          hole(8,2);
-        }
+      translate([0,0,6]) {
+        hole(8,2);
       }
     }
   }
@@ -289,7 +322,7 @@ module drive_side() {
       hole(filament_opening_diam,motor_side*3,16);
 
       // bowden retainer holes
-      translate([0,0,motor_side/4]) {
+      translate([0,0,motor_side/2-8]) {
         bowden_retainer_void();
       }
 
@@ -301,7 +334,7 @@ module drive_side() {
       }
     }
 
-    # translate([-drive_motor_x,-drive_motor_y,0]) {
+    translate([-drive_motor_x,-drive_motor_y,0]) {
       translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
         rotate([0,0,idler_nut_angle_from_drive_side]) {
           rotate([90,0,0]) {
@@ -334,7 +367,41 @@ module idler_side() {
 
   module body() {
     translate([main_height/2,0,0]) {
-      base_body(main_height, idler_hinge_pos_y);
+      intersection() {
+        base_body(main_height, idler_hinge_pos_y);
+        union() {
+          translate([0,0,motor_side/2]) {
+            cube([main_height*2,motor_side,motor_side],center=true);
+          }
+          translate([0,-motor_side/2,0]) {
+            cube([main_height*2,motor_side,motor_side],center=true);
+          }
+          hull() {
+            translate([0,-motor_hole_spacing/2,-motor_hole_spacing/2]) {
+              rotate([0,90,0]) {
+                hole(rounded_diam,main_height+1,resolution);
+              }
+            }
+            translate([0,0,-hobbed_area_opening/2-rounded_diam/2]) {
+              rotate([0,90,0]) {
+                hole(rounded_diam,main_height+1,resolution);
+              }
+            }
+            /*
+            translate([0,motor_shoulder_diam/2-rounded_diam/2+1,-motor_shoulder_diam/2]) {
+              rotate([0,90,0]) {
+                hole(rounded_diam,main_height+1,resolution);
+              }
+            }
+            */
+            translate([0,idler_hinge_pos_y,hinge_pos_z]) {
+              rotate([0,90,0]) {
+                hole(hinge_body_diam,main_height+1,resolution);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -343,7 +410,21 @@ module idler_side() {
   }
 
   module bridges() {
-    base_bridges(main_height, idler_hinge_pos_y, rear);
+    opening_side = rear;
+    translate([opening_side*(motor_shoulder_height+1+extrusion_height/2),0,0]) {
+      rotate([20*-opening_side,0,0]) {
+        rotate([0,90,0]) {
+          translate([0,2*-opening_side,0]) {
+            cube([motor_shoulder_diam+1,motor_shoulder_diam,extrusion_height],center=true);
+          }
+        }
+      }
+    }
+    translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
+      rotate([0,90,0]) {
+        hole(motor_shoulder_diam-6,motor_shoulder_height+1,resolution);
+      }
+    }
   }
 
   difference() {
