@@ -64,17 +64,18 @@ drive_motor_x = (motor_x-hinge_offset/2) * right;
 drive_motor_x = (hinge_offset) * right;
 drive_motor_y = motor_y * rear;
 drive_motor_z = 0;
-idler_motor_x = (motor_x+hinge_offset) * left;
+idler_motor_x = (motor_x-2+hinge_offset) * left;
 idler_motor_y = motor_y * front;
 idler_motor_z = 0;
 
 drive_side_height = abs(drive_motor_x) + hinge_offset;
-idler_side_height = hinge_offset*2;
+idler_side_height = abs(idler_motor_x) - hinge_offset;
 
 idler_nut_pos_x                 = left*(bowden_tubing_diam/2);
-idler_nut_pos_y                 = motor_side*.45;
-idler_nut_pos_z                 = extruder_side/2 + m3_nut_diam/2;
-idler_nut_angle_from_drive_side = -15;
+idler_nut_pos_x                 = left*(drive_side_height/2);
+idler_nut_pos_y                 = drive_motor_y+motor_hole_spacing/2;
+idler_nut_pos_z                 = extruder_side/2 + 1 + m3_nut_diam/2;
+idler_nut_angle_from_drive_side = 0;
 idler_screw_len                 = motor_side;
 
 idler_anchor_pos_x = 0;
@@ -82,7 +83,7 @@ idler_anchor_pos_x = 0;
 
 show_drive_side = 1;
 show_idler_side = 1;
-show_bridges    = 0;
+show_bridges    = 1;
 
 module position_drive_motor() {
   translate([drive_motor_x,drive_motor_y,0]) {
@@ -272,6 +273,20 @@ module drive_side() {
   filament_pos_x    = -drive_motor_x;
   filament_pos_y    = -drive_motor_y;
 
+  module pos_zero() {
+    translate([-drive_motor_x,-drive_motor_y,0]) {
+      children();
+    }
+  }
+
+  module pos_idler() {
+    pos_zero() {
+      translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
+        children();
+      }
+    }
+  }
+
   module body() {
     translate([-main_height/2,0,0]) {
       intersection() {
@@ -306,6 +321,26 @@ module drive_side() {
           }
         }
       }
+
+      /*
+      hull() {
+        translate([main_height/2-1,motor_hole_spacing/2,motor_hole_spacing/2]) {
+          rotate([0,90,0]) {
+            hole(rounded_diam,2,resolution);
+          }
+        }
+
+        translate([main_height/2,0,0]) {
+          pos_idler() {
+            rotate([90,0,0]) {
+              rotate([0,0,90]) {
+                hole(m3_nut_diam+extrusion_width*6,rounded_diam,6);
+              }
+            }
+          }
+        }
+      }
+      */
     }
   }
 
@@ -386,14 +421,17 @@ module drive_side() {
       }
     }
 
-    translate([-drive_motor_x,-drive_motor_y,0]) {
-      translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
-        rotate([0,0,idler_nut_angle_from_drive_side]) {
-          rotate([90,0,0]) {
-            translate([0,0,motor_side/2]) {
-              hole(m3_diam, motor_side, resolution);
-            }
-            hole(m3_nut_diam, 3, 6);
+    pos_idler() {
+      translate([-10,rounded_diam/2,0]) {
+        cube([20,8,m3_nut_diam+0.5],center=true);
+      }
+      rotate([90,0,0]) {
+        rotate([0,0,90]) {
+          translate([0,0,motor_side/2]) {
+            hole(m3_diam+1, motor_side, 6);
+          }
+          translate([0,0,-rounded_diam/4+1-0.05]) {
+            hole(m3_nut_diam+.5, rounded_diam/2+2, 6);
           }
         }
       }
@@ -474,7 +512,7 @@ module idler_side() {
     }
     translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
       rotate([0,90,0]) {
-        hole(motor_shoulder_diam-6,motor_shoulder_height+1,resolution);
+        hole(hobbed_area_opening,motor_shoulder_height+1,resolution);
       }
     }
   }
