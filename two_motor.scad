@@ -74,8 +74,9 @@ idler_side_height = abs(idler_motor_x) - hinge_offset;
 
 idler_nut_pos_x                 = left*(drive_side_height/2);
 idler_nut_pos_x                 = left*(bowden_tubing_diam/2 + m3_diam/2 + 2);
+idler_nut_pos_x                 = drive_motor_x-drive_side_height - m3_nut_diam/2 - 2;
 idler_nut_pos_y                 = drive_motor_y+motor_hole_spacing/2;
-idler_nut_pos_z                 = extruder_side/2 + 3 + m3_nut_diam/2;
+idler_nut_pos_z                 = extruder_side/2 + 4 + m3_nut_diam/2;
 idler_nut_angle_from_drive_side = 0;
 idler_screw_len                 = motor_side;
 
@@ -321,10 +322,10 @@ module drive_side() {
   }
 
   module body() {
-    idler_screw_body_len = extruder_side/2+motor_y-bowden_tubing_diam/2-2;
+    idler_screw_body_len = motor_hole_spacing/2+motor_y-bowden_tubing_diam/2-4;
 
     translate([-main_height/2,0,0]) {
-      translate([0,extruder_side/2-idler_screw_body_len/2,0]) {
+      translate([0,motor_hole_spacing/2-idler_screw_body_len/2,0]) {
         hull() {
           translate([-drive_motor_x+main_height/2+idler_nut_pos_x,0,idler_nut_pos_z]) {
             rotate([90,0,0]) {
@@ -336,7 +337,7 @@ module drive_side() {
           }
         }
         translate([0,0,extruder_side/2-rounded_diam]) {
-          cube([main_height,idler_screw_body_len,rounded_diam*2],center=true);
+          //cube([main_height,idler_screw_body_len,rounded_diam*2],center=true);
         }
       }
       intersection() {
@@ -532,9 +533,10 @@ module idler_side() {
     }
 
     idler_latch_width = abs(idler_motor_x) + idler_nut_pos_x + m3_diam/2 + extrusion_width*8;
+    idler_latch_width = idler_side_height;
     hull() {
-      translate([0,-extruder_side/2,0]) {
-        translate([idler_latch_width/2,0,0]) {
+      translate([0,0,0]) {
+        translate([idler_latch_width/2,rounded_diam/2,0]) {
           translate([0,0,idler_nut_pos_z+4]) {
             rotate([0,90,0]) {
               hole(rounded_diam,idler_latch_width,resolution);
@@ -546,13 +548,6 @@ module idler_side() {
             }
           }
         }
-        /*
-        translate([2,rounded_diam/2,motor_hole_spacing/2]) {
-          rotate([0,90,0]) {
-            hole(rounded_diam,4,resolution);
-          }
-        }
-        */
       }
     }
   }
@@ -624,8 +619,8 @@ module assembly() {
   % translate([idler_nut_pos_x,idler_nut_pos_y,idler_nut_pos_z]) {
     rotate([90,0,0]) {
       hole(m3_nut_diam, 3, 6);
-      translate([0,0,motor_side]) {
-        hole(m3_diam, motor_side*2, resolution);
+      translate([0,0,15]) {
+        hole(m3_diam, 30, resolution);
       }
     }
   }
