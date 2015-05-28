@@ -78,14 +78,13 @@ idler_nut_pos_x                 = drive_motor_x-drive_side_height - m3_nut_diam/
 idler_nut_pos_y                 = drive_motor_y+motor_hole_spacing/2;
 idler_nut_pos_z                 = extruder_side/2 + 4 + m3_nut_diam/2;
 idler_nut_angle_from_drive_side = 0;
-idler_screw_len                 = motor_side;
 
 idler_anchor_pos_x = 0;
 idler_anchor_pos_x = 0;
 
 show_drive_side = 1;
 show_idler_side = 1;
-show_bridges    = 0;
+show_bridges    = 1;
 idler_assembly_angle     = 0;
 
 module position_drive_motor() {
@@ -279,7 +278,7 @@ module idler_screw_holes() {
         translate([0,0,0]) {
           rotate([90,0,0]) {
             translate([0,0,-rounded_diam/4+1-0.05]) {
-              hole(m3_nut_diam+.5, rounded_diam/2+2, 6);
+              hole(m3_nut_diam+.1, rounded_diam/2+2, 6);
             }
           }
         }
@@ -292,7 +291,7 @@ module idler_screw_holes() {
         translate([0,0,0]) {
           rotate([90,0,0]) {
             translate([0,0,motor_side]) {
-              hole(m3_diam+.5, motor_side*2, 8);
+              hole(m3_diam+.1, motor_side*2, 8);
             }
           }
         }
