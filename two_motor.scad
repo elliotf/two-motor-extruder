@@ -57,11 +57,12 @@ hinge_opening_diam   = hinge_diam + hinge_gap*2;
 hinge_body_diam      = max(hinge_opening_diam,hinge_nut_diam) + extrusion_width * 8;
 hinge_pos_y          = front*(bowden_tubing_diam/2+extrusion_width*2+hinge_opening_diam/2);
 hinge_pos_y          = 0;
-hinge_pos_z          = -motor_side/2-hinge_nut_outer_diam;
+hinge_pos_z          = -35;
 hinge_offset         = bowden_retainer_body_diam/2;
 
 drive_motor_x = (motor_x-hinge_offset/2) * right;
 drive_motor_x = (hinge_offset) * right;
+drive_motor_x = hobbed_pulley_hob_to_base + motor_shoulder_height + 2;
 drive_motor_y = motor_y * rear;
 drive_motor_z = 0;
 idler_motor_x = (motor_x-2+hinge_offset) * left;
@@ -151,7 +152,7 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
     // clearance for drive-side grub screw
     rotate([0,90,0]) {
       hole(hobbed_area_opening,(abs(drive_motor_x)-filament_diam/2)*2,resolution*2);
-      hole(hobbed_area_opening+4,(motor_shoulder_height+1)*2,resolution*2);
+      hole(hobbed_area_opening+6,(motor_shoulder_height+1)*2,resolution*2);
     }
   }
 
@@ -169,13 +170,13 @@ module base_holes(main_height, hinge_pos_y, opening_side) {
   translate([opening_side*(main_height+1),0,0]) {
     hull() {
       rotate([0,90,0]) {
-        hole(motor_shoulder_diam,2,resolution);
-        hole(hobbed_area_opening,main_height-hinge_offset,resolution);
+        hole(hobbed_area_opening+5,2,resolution);
+        hole(hobbed_area_opening,main_height-hinge_offset/2+2-bowden_tubing_diam-extrusion_height*2,resolution);
       }
       translate([0,motor_side*opening_side,0]) {
         rotate([0,90,0]) {
-          hole(motor_shoulder_diam,2,resolution);
-          hole(hobbed_area_opening,main_height-hinge_offset,resolution);
+          hole(hobbed_area_opening+5,2,resolution);
+          hole(hobbed_area_opening,main_height-hinge_offset/2+2-bowden_tubing_diam-extrusion_height*2,resolution);
         }
       }
     }
@@ -262,7 +263,7 @@ module base_bridges(main_height, hinge_pos_y, opening_side) {
   }
   translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
     rotate([0,90,0]) {
-      hole(hobbed_area_opening,motor_shoulder_height+1,resolution);
+      hole(hobbed_area_opening+2,motor_shoulder_height+1,resolution);
     }
   }
 }
@@ -290,11 +291,7 @@ module drive_side() {
   module body() {
     translate([-main_height/2,0,0]) {
       intersection() {
-        union() {
-          hull() {
-            base_body(main_height, drive_hinge_pos_y, front);
-          }
-        }
+        base_body(main_height, drive_hinge_pos_y, front);
         union() {
           translate([0,0,motor_side/2]) {
             cube([main_height*2,motor_side+1,motor_side],center=true);
@@ -366,6 +363,8 @@ module drive_side() {
     bottom_tubing_r = (motor_side*1.5)/2;
     angle_of_bottom_tubing_exit = 30;
 
+    vertical_length = 10;
+
     // filament path
     translate([filament_pos_x,filament_pos_y,0]) {
       translate([0,0,motor_side/2-hobbed_area_opening/2-5]) {
@@ -378,44 +377,43 @@ module drive_side() {
       }
 
       // hotend-side bowden tubing path
-      translate([0,0,bowden_retainer_lip+hobbed_area_opening/2+motor_side/2]) {
+      translate([0,0,motor_side/2]) {
         hole(bowden_tubing_diam,motor_side,16);
       }
 
       /*
+      // for debugging the spool side bowden tube
       translate([main_height/2,0,0]) {
         cube([main_height,motor_side*2,motor_side*2],center=true);
       }
       */
 
       // spool side tubing
-      translate([0,0,-hobbed_area_opening/2-extrusion_width*2]) {
-        translate([0,bottom_tubing_r,0]) {
-          rotate([0,0,0]) {
-            translate([0,-bottom_tubing_r,0]) {
-            }
-          }
-          intersection() {
-            rotate([0,90,0]) {
-              rotate_extrude($fn=64) {
-                translate([bottom_tubing_r,0,0]) {
-                  accurate_circle(bowden_tubing_diam+1,16);
-                }
-              }
-            }
-            translate([0,0,-motor_side]) {
-              cube([motor_side*2,motor_side*2,motor_side*2],center=true);
-            }
-            rotate([angle_of_bottom_tubing_exit,0,0]) {
-              translate([0,-bottom_tubing_r,motor_side]) {
-                cube([motor_side*2,bottom_tubing_r*2,motor_side*2],center=true);
-              }
-            }
-          }
-          rotate([angle_of_bottom_tubing_exit,0,0]) {
-            translate([0,-bottom_tubing_r,-motor_side]) {
-              hole(bowden_tubing_diam+1,motor_side*2+1,16);
-            }
+      // hotend-side bowden tubing path
+      translate([0,0,-bowden_retainer_lip-hobbed_area_opening/2-vertical_length/2]) {
+        hole(bowden_tubing_diam,vertical_length,16);
+      }
+      hull() {
+        translate([0,0,-bowden_retainer_lip-hobbed_area_opening/2-vertical_length-3+0.05]) {
+          hole(bowden_tubing_diam,6,16);
+        }
+        translate([0,hinge_pos_y+hinge_body_diam/2+bowden_tubing_diam/2+1,hinge_pos_z]) {
+          hole(bowden_tubing_diam,6,16);
+        }
+      }
+    }
+
+    // idler side grub screw
+    translate([front*(main_height+1),front*motor_y*2,0]) {
+      hull() {
+        rotate([0,90,0]) {
+          hole(hobbed_area_opening+8,2,resolution);
+          hole(hobbed_area_opening,main_height-hinge_offset/2+2-bowden_tubing_diam/2,resolution);
+        }
+        translate([0,motor_side*front,0]) {
+          rotate([0,90,0]) {
+            hole(hobbed_area_opening+8,2,resolution);
+            hole(hobbed_area_opening,main_height-hinge_offset/2+2-bowden_tubing_diam/2,resolution);
           }
         }
       }
@@ -512,7 +510,7 @@ module idler_side() {
     }
     translate([opening_side*(motor_shoulder_height+1)/2,0,0]) {
       rotate([0,90,0]) {
-        hole(hobbed_area_opening,motor_shoulder_height+1,resolution);
+        hole(hobbed_area_opening+2,motor_shoulder_height+1,resolution);
       }
     }
   }
