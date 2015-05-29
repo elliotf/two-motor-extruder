@@ -4,10 +4,12 @@ This is an *UNTESTED* work in progress of a parametric dual-motor NEMA14/NEMA17 
 
 # Why?
 
-* The printrbot extruder is not parametric and does not work for 3mm filament
+* Driving both sides of the filament seems like a good idea
 * The bondtech extruder is beautiful but expensive
 * You cannot reuse a 1.75mm bondtech extruder for 3mm filament (and vice versa)
-* The components involved are not special, and can be acquired easily
+* The printrbot extruder is not parametric and does not work for 3mm filament
+* The components involved in this are not special, and can be acquired easily (versus intricate custom machined things)
+* A normal NEMA17 doesn't seem to have enough power to direct drive 3mm via bowden by itself
 * You could probably use dual NEMA14 motors to direct-drive 1.75mm filament (if you wanted to)
 
 # Printing directions
