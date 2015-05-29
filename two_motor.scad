@@ -1,5 +1,5 @@
-include <scad/config.scad>;
-use <scad/rewrite_simpler.scad>;
+include <config.scad>;
+include <util.scad>;
 
 /*
 
@@ -632,15 +632,17 @@ module assembly() {
 
   if (show_drive_side) {
     translate([drive_motor_x+0.05,drive_motor_y,drive_motor_z]) {
-      drive_side();
+      color("orange") drive_side();
     }
 
     translate([0.05,0,0]) {
       position_drive_motor() {
-        //% motor();
+        if (show_motors) {
+          % motor();
+        }
 
         translate([0,0,drive_motor_x]) {
-          % hobbed_pulley();
+          % color("silver") hobbed_pulley();
         }
       }
     }
@@ -650,16 +652,18 @@ module assembly() {
     translate([idler_motor_x-0.05,0,hinge_pos_z]) {
       rotate([idler_assembly_angle,0,0]) {
         translate([0,idler_motor_y,-hinge_pos_z]) {
-          idler_side();
+          color("lightblue") idler_side();
         }
       }
     }
     translate([-0.05,0,0]) {
       position_idler_motor() {
-        //% motor();
+        if (show_motors) {
+          % motor();
+        }
 
         translate([0,0,-idler_motor_x]) {
-          % hobbed_pulley();
+          % color("silver") hobbed_pulley();
         }
       }
     }
