@@ -1,14 +1,3 @@
-scad/inc/parametric\_involute\_gear\_v5.0.scad:
-Parametric Involute Bevel and Spur Gears by GregFrost http://www.thingiverse.com/thing:3575
-© 2010 by GregFrost and licensed under the Creative Commons - GNU GPL license.
-
-scad/inc/spur\_generator.scad:
-Spur Gear Fitter Script http://www.thingiverse.com/thing:6894
-Copyright 2011 Cliff L. Biffle and licensed Creative Commons Attribution-ShareAlike 3.0
-http://creativecommons.org/licenses/by-sa/3.0/
-
-All other files:
-
 The MIT License (MIT)
 
 Copyright (c) 2013 Elliot Foster
