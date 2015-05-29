@@ -60,6 +60,7 @@ motor_shaft_len = nema17_shaft_len;
 motor_short_shaft_len = nema17_short_shaft_len;
 motor_shoulder_height = nema17_shoulder_height;
 motor_shoulder_diam = nema17_shoulder_diam;
+motor_diam          = 51;
 
 /*
 motor_side = nema14_side;
